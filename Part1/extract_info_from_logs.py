@@ -1,8 +1,8 @@
 ######
-# Raw logs in folder "Raw". Each file should be named with the pattern:
+# Raw logs in folder "part1_raw_outputs". Each file should be named with the pattern:
 # {inteference}_{runIndex}.txt
 #
-# The results are saved in a folder called "Extracted" (created beforehand)
+# The results are saved in a folder called "part1_extracted_data" (created beforehand)
 ######
 
 import numpy as np
@@ -31,7 +31,7 @@ def main():
     for interference in interferences:
         print(f"Considering interference {interference}")
 
-        output_file = open(f"Extracted/{interference}_interference.txt", "w")
+        output_file = open(f"part1_extracted_data/{interference}_interference.txt", "w")
         output_file.write("avg_qps, min_p95, avg_p95, max_p95\n")
         
         for line_number in range(11):
@@ -41,7 +41,7 @@ def main():
             values_qps_runs = []
             
             for i in range(3):  # Files contain an index the run index
-                filename = f"Raw/{interference}_{i}.txt"
+                filename = f"part1_raw_outputs/{interference}_{i}.txt"
                 data = read_data(filename)
                 
                 p95, qps = extract_values_from_line(data, line_number)
