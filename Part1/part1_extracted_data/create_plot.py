@@ -20,10 +20,10 @@ def read_data(filename):
 
 def plot_file(filename, marker):
     data = read_data(filename)
-    x = [row[0] for row in data]
-    y = [row[1] for row in data]
-    yerr_min = [row[2] for row in data]
-    yerr_max = [row[3] for row in data]
+    x = [float(row[0]) for row in data]
+    y = [float(row[1]) for row in data]
+    yerr_min = [float(row[1]-row[2]) for row in data]
+    yerr_max = [float(row[3]-row[1]) for row in data]
 
     base_name = os.path.basename(filename)
     main_name = base_name.split('_')[0]
