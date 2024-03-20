@@ -25,7 +25,9 @@ This script will upload and run the script `run_on_deployed.sh` (which must be o
 
 ## Run the tests on all interferences for multiple times
 
-Move the file `run.sh` in the folder `cloud-comp-arch-project`. \
+Move the file `run_all.sh` in the folder `cloud-comp-arch-project`. \
 Inside the file, change the value of the variable `CCA_PROJECT_PUB_KEY` according to your configuration. The script will end if it is not set or if the filename ends with `.pub`.
 
-It will run the tests for all the interferences specified in the array `ALL_INTERFERENCE_TYPES` as many times as it is specified in `RUN_TIMES`. For each test, it will save the output in the folder `outputs`. It will ask for the SSH password multiple times.
+Run the script with `./run_all.sh`. If there is a permission denied error, run `chmod 744 run_all.sh` in order to set the permission to execute the script.
+
+It will run the tests for all the interferences specified in the array `ALL_INTERFERENCE_TYPES` as many times as it is specified in `RUN_TIMES`. For each test, it will save the output in the folder `part1_raw_outputs`. It will ask for the SSH password multiple times.
