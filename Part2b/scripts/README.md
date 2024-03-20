@@ -2,6 +2,8 @@
 
 Assuming that the folder `cloud-comp-arch-project` was already cloned from github.
 
+If you get the error `-bash: ./file.sh: /bin/bash^M: bad interpreter: No such file or directory`, it is caused by some incompatibilities between newlines in Windows and Linux. In order to easily solve the problem, run the command `sed -i -e 's/\r$//' file.sh`.
+
 ## Start the cluster
 
 Move the file `setup.sh` in the folder `cloud-comp-arch-project`. \

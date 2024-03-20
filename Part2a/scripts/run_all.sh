@@ -44,8 +44,8 @@ for interference in "${ALL_INTERFERENCE_TYPES[@]}"; do
         do
             if [[ "$CURRENT_STATUS" == "0/1" ]]
             then
-                echo "Job not finished yet, sleeping 5 seconds."
-                sleep 5
+                echo "Job not finished yet, sleeping 15 seconds."
+                sleep 15
                 
             else
                 echo "Parsec workload does not exist, creating"

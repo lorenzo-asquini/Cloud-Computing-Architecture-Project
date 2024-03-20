@@ -2,6 +2,8 @@
 
 Assuming that the folder `cloud-comp-arch-project` was already cloned from github.
 
+If you get the error `-bash: ./file.sh: /bin/bash^M: bad interpreter: No such file or directory`, it is caused by some incompatibilities between newlines in Windows and Linux. In order to easily solve the problem, run the command `sed -i -e 's/\r$//' file.sh`.
+
 ## Start the cluster
 
 Move the file `setup.sh` in the folder `cloud-comp-arch-project`. \
@@ -21,7 +23,7 @@ Inside the file, change the value of the variable `CCA_PROJECT_PUB_KEY` accordin
 
 Run the script with `./deploy.sh`. If there is a permission denied error, run `chmod 744 deploy.sh` in order to set the permission to execute the script.
 
-This script will upload and run the script `run_on_deployed.sh` (which must be on the same folder) on the servers. It will ask multiple times the SSH password.
+This script will upload and run the script `run_on_deployed.sh` (which must be on the same folder) on the servers. It will ask multiple times for the SSH password if you have set a password for the key.
 
 ## Run the tests on all interferences for multiple times
 
@@ -30,4 +32,4 @@ Inside the file, change the value of the variable `CCA_PROJECT_PUB_KEY` accordin
 
 Run the script with `./run_all.sh`. If there is a permission denied error, run `chmod 744 run_all.sh` in order to set the permission to execute the script.
 
-It will run the tests for all the interferences specified in the array `ALL_INTERFERENCE_TYPES` as many times as it is specified in `RUN_TIMES`. For each test, it will save the output in the folder `part1_raw_outputs`. It will ask for the SSH password multiple times.
+It will run the tests for all the interferences specified in the array `ALL_INTERFERENCE_TYPES` as many times as it is specified in `RUN_TIMES`. For each test, it will save the output in the folder `part1_raw_outputs`. It will ask multiple times for the SSH password if you have set a password for the key.

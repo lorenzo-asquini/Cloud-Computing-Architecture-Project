@@ -7,6 +7,7 @@
 
 import re
 from tabulate import tabulate
+import matplotlib.pyplot as plt
 
 # Search for the time in the file and extract it
 def extract_time_from_file(filename):
@@ -21,15 +22,18 @@ def extract_time_from_file(filename):
     return None
 
 def main():
-    all_workloads = ["blackscholes", "canneal"] #["blackscholes", "canneal", "dedup", "ferret", "freqmine", "radix", "vips"]
-    all_threads_amount = ["2", "4"] #["1", "2", "4", "8"]
+    all_workloads = ["blackscholes", "canneal", "dedup", "ferret", "freqmine", "radix", "vips"]
+    all_threads_amount = ["1", "2", "4", "8"]
 
     table = [['Workload'] + all_threads_amount]
+
+    speedup_data = {}
 
     for workload in all_workloads:
         row = [workload]
         
         one_thread_time = None
+        speedup_data[workload] = []
         
         for nr_threads in all_threads_amount:
             filename = f"part2b_raw_outputs/{workload}_{nr_threads}.txt"
@@ -41,12 +45,28 @@ def main():
                     
                 speedup = one_thread_time / time_ms
                 row.append(speedup)
+                speedup_data[workload].append(speedup)
             else:
                 row.append(None)
 
         table.append(row)
 
     print(tabulate(table, headers='firstrow', tablefmt='grid'))
+
+    # Plotting
+    plt.figure(figsize=(10, 6))
+    for workload, speeds in speedup_data.items():
+        plt.plot(all_threads_amount, speeds, marker='o', label=workload)
+
+    plt.xlabel('Number of Threads')
+    plt.ylabel('Speedup')
+    plt.title('Speedup vs Number of Threads')
+    plt.legend()
+    plt.grid(True)
+    plt.xticks(all_threads_amount)
+    plt.tight_layout()
+    plt.show()
+
 
 if __name__ == "__main__":
     main()
