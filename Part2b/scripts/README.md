@@ -11,10 +11,10 @@ Run the script with `./setup.sh`. If there is a permission denied error, run `ch
 
 Even if at the end it says that the parsec server was not labeled, it should still be ok.
 
-## Run the tests on all interferences, for all workloads
+## Run the tests using different number of threads, for all workloads
 
 Move the file `run_all.sh` in the folder `cloud-comp-arch-project`.
 
 Run the script with `./run_all.sh`. If there is a permission denied error, run `chmod 744 run_all.sh` in order to set the permission to execute the script.
 
-It will run the tests for each parsec workload specified in the array `ALL_WORKLOADS`, for all the interferences specified in the array `ALL_INTERFERENCE_TYPES`, one time. For each test, it will save the output in the folder `part2a_raw_outputs`.
+It will run the tests for each parsec workload specified in the array `ALL_WORKLOADS`, for all the number of threads specified in the array `ALL_THREADS_AMOUNT`, one time. For each test, it will save the output in the folder `part2a_raw_outputs`.

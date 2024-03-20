@@ -17,9 +17,9 @@ echo "Using KOPS STATE STORE: $KOPS_STATE_STORE"
 
 PROJECT=`gcloud config get-value project`
 
-kops create -f part2a.yaml
+kops create -f part2b.yaml
 
-kops update cluster --name part2a.k8s.local --yes --admin
+kops update cluster --name part2b.k8s.local --yes --admin
 
 kops validate cluster --wait 10m
 

@@ -7,7 +7,7 @@ DEFAULT_CCA_PROJECT_PUB_KEY="~/.ssh/file.pub"
 KOPS_STATE_STORE="gs://cca-eth-2024-group-XXX-ethzid/"
 CCA_PROJECT_PUB_KEY="~/.ssh/file.pub"
 
-# Export the variables if changed in this script
+# Exit if the variables are still the default ones
 if [ "$KOPS_STATE_STORE" == "$DEFAULT_KOPS_STATE_STORE" ]; then
     echo "KOPS STATE STORE value is still the placeholder one. Change it!"
     exit 1

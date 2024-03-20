@@ -26,8 +26,8 @@ for interference in "${ALL_INTERFERENCE_TYPES[@]}"; do
             else
                 echo "Interference pod does not exist, creating."
                 kubectl create -f interference/ibench-$interference.yaml
-                echo "Sleeping 5 seconds"
-                sleep 5
+                echo "Sleeping 15 seconds"
+                sleep 15
             fi
             CURRENT_STATUS=$(kubectl get pod ibench-$interference | grep ibench-$INTERFEREinterferenceNCE_TYPE | awk -v OFS='\t\t' '{print $2}')
         done
@@ -44,8 +44,8 @@ for interference in "${ALL_INTERFERENCE_TYPES[@]}"; do
         do
             if [[ "$CURRENT_STATUS" == "0/1" ]]
             then
-                echo "Job not finished yet, sleeping 15 seconds."
-                sleep 15
+                echo "Job not finished yet, sleeping 5 seconds."
+                sleep 5
                 
             else
                 echo "Parsec workload does not exist, creating"
