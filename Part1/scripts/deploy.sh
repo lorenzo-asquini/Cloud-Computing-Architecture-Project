@@ -1,3 +1,20 @@
+#!/bin/bash
+
+DEFAULT_CCA_PROJECT_PUB_KEY="~/.ssh/file"
+
+# Change this variables according to your configuration (do not add .pub at the end)
+CCA_PROJECT_PUB_KEY="~/.ssh/file"
+
+if [[ "$CCA_PROJECT_PUB_KEY" == *.pub ]]; then
+    echo "Path to the SSH key ends with .pub. In this case, remove it!"
+    exit 1
+fi
+
+if [ "$CCA_PROJECT_PUB_KEY" == "$DEFAULT_CCA_PROJECT_PUB_KEY" ]; then
+    echo "SSH PUB KEY value is still the placeholder one. Change it!"
+    exit 1
+fi
+
 kubectl create -f memcache-t1-cpuset.yaml
 
 kubectl expose pod some-memcached --name some-memcached-11211 \

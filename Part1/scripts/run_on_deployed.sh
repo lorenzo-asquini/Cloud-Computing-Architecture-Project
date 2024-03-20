@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sudo NEEDRESTART_MODE=a apt-get update
 sudo NEEDRESTART_MODE=a apt-get install libevent-dev libzmq3-dev git make g++ --yes
 sudo cp /etc/apt/sources.list /etc/apt/sources.list~
