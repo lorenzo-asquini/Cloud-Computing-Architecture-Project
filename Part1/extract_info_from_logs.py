@@ -22,9 +22,8 @@ def extract_values_from_line(data, line_number):
 def calculate_statistics(values_p95, values_qps):
     avg_p95 = np.mean(values_p95)
     avg_qps = np.mean(values_qps)
-    min_p95 = np.min(values_p95)
-    max_p95 = np.max(values_p95)
-    return (min_p95, avg_p95, max_p95, avg_qps)
+    std_p95 = np.std(values_p95)
+    return (avg_qps, avg_p95, std_p95)
 
 def main():
     interferences = ["none", "cpu", "l1d", "l1i", "l2", "llc", "membw"]
@@ -32,7 +31,7 @@ def main():
         print(f"Considering interference {interference}")
 
         output_file = open(f"part1_extracted_data/{interference}_interference.txt", "w")
-        output_file.write("avg_qps, min_p95, avg_p95, max_p95\n")
+        output_file.write("avg_qps, avg_p95, std_p95\n")
         
         for line_number in range(11):
 
@@ -48,10 +47,10 @@ def main():
                 values_p95_runs.append(p95)
                 values_qps_runs.append(qps)
         
-            min_p95, avg_p95, max_p95, avg_qps = calculate_statistics(values_p95_runs, values_qps_runs)
+            avg_qps, avg_p95, std_p95 = calculate_statistics(values_p95_runs, values_qps_runs)
 
             # One decimal place for readibility
-            output_file.write(f"{avg_qps:.1f}, {min_p95:.1f}, {avg_p95:.1f}, {max_p95:.1f}\n")
+            output_file.write(f"{avg_qps:.1f}, {avg_p95:.1f}, {std_p95:.1f}\n")
 
         output_file.close()
 
