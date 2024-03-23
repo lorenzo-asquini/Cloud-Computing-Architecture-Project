@@ -46,7 +46,7 @@ def main():
 
         table.append(row)
 
-    print(tabulate(table, headers='firstrow', tablefmt='grid'))
+    print(tabulate(table, headers='firstrow', tablefmt='grid', floatfmt=".2f"))
 
 if __name__ == "__main__":
     main()
