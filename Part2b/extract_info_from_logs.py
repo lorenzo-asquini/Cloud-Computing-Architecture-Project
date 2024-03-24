@@ -54,17 +54,40 @@ def main():
     print(tabulate(table, headers='firstrow', tablefmt='grid'))
 
     # Plotting
-    plt.figure(figsize=(10, 6))
-    for workload, speeds in speedup_data.items():
-        plt.plot(all_threads_amount, speeds, marker='o', label=workload)
+    markers = ['o', 'v', '1', 's', 'p', '*', 'X']
+    for (workload, speedup), marker in zip(speedup_data.items(), markers):
+        plt.plot(all_threads_amount, speedup, label=workload, linewidth=2.5,
+                 marker=marker, markersize=12, markeredgewidth=2.5)
 
-    plt.xlabel('Number of Threads')
-    plt.ylabel('Speedup')
-    plt.title('Speedup vs Number of Threads')
-    plt.legend()
-    plt.grid(True)
+    #### Plot look
+
+    ## Axis
+    axis_label_font = {'fontsize': 13, 'fontweight': 'bold'}
+    plt.xlabel('Number of Threads', fontdict=axis_label_font)
+    plt.ylabel('Speedup', fontdict=axis_label_font)
+
+    ## Title
+    title_font = {'fontsize': 14, 'fontweight': 'bold'}
+    plt.title('''
+    Speedup vs. Number of Threads for different jobs
+    ''', fontdict=title_font)
+
+    ## Ticks
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
     plt.xticks(all_threads_amount)
-    plt.tight_layout()
+
+    ## Lines
+    plt.gca().spines['top'].set_color('gray')
+    plt.gca().spines['right'].set_color('gray')
+    plt.gca().spines['bottom'].set_color('black')
+    plt.gca().spines['left'].set_color('black')
+
+    plt.grid(True, linestyle='--', linewidth=0.5, color='gray')
+
+    ## Legend
+    plt.legend(fontsize=13)
+
     plt.show()
 
 
