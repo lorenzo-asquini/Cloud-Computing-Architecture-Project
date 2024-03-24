@@ -15,21 +15,22 @@ def read_data(filename):
         for line in file:
             values = line.strip().split(',')
             
-            # avg_qps, avg_p95, std_p95
-            data.append([float(values[0]), float(values[1]), float(values[2])])
+            # avg_qps, std_qps, avg_p95, std_p95
+            data.append([float(values[0]), float(values[1]), float(values[2]), float(values[3])])
     return data
 
 # Plot information about interference. Transform ns to ms
 def plot_file(filename, marker):
     data = read_data(filename)
-    x = [float(row[0]) for row in data]
-    y = [float(row[1]/1000) for row in data]  # Transform into ms
-    yerr_std = [row[2]/1000 for row in data]
+    x = [row[0] for row in data]
+    xerr_std = [row[1] for row in data]
+    y = [row[2]/1000 for row in data]  # Transform into ms
+    yerr_std = [row[3]/1000 for row in data] 
 
     base_name = os.path.basename(filename)
     main_name = base_name.split('_')[0]
 
-    plt.errorbar(x, y, yerr=yerr_std, capsize=8, label=main_name, linewidth=2.5,
+    plt.errorbar(x, y, xerr=xerr_std, yerr=yerr_std, capsize=8, label=main_name, linewidth=2.5,
                  marker=marker, markersize=12, markerfacecolor='None', markeredgewidth=2.5)
 
 # Express thousands with K in plot
@@ -51,13 +52,13 @@ for interference, marker in zip(interferences, markers):
 ## Axis
 axis_label_font = {'fontsize': 13, 'fontweight': 'bold'}
 plt.xlabel('Queries Per Second (QPS)', fontdict=axis_label_font)
-plt.ylabel('95th percentile latency (ms)', fontdict=axis_label_font)
+plt.ylabel('95th Percentile Latency (ms)', fontdict=axis_label_font)
 
 ## Title
 title_font = {'fontsize': 14, 'fontweight': 'bold'}
 plt.title('''
-95th Percentile Latency with difference interferences\n
-Error bars: Standard deviation (3 repetitions per point)
+95th Percentile Latency with Different Interferences\n
+Error Bars: Standard Deviation (3 repetitions per point)
 ''', fontdict=title_font, linespacing=0.5)
 
 ## Ticks
@@ -81,5 +82,6 @@ handles = [h[0] for h in handles]  # Remove error bars from legend
 plt.gca().legend(handles, labels, fontsize=13)
 
 plt.ylim(0, 8)
+plt.xlim(0, 55000)
 
 plt.show()
