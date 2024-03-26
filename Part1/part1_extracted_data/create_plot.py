@@ -31,7 +31,7 @@ def plot_file(filename, marker):
     main_name = base_name.split('_')[0]
 
     plt.errorbar(x, y, xerr=xerr_std, yerr=yerr_std, capsize=8, label=main_name, linewidth=2.5,
-                 marker=marker, markersize=12, markerfacecolor='None', markeredgewidth=2.5)
+                 marker=marker, markersize=8, markerfacecolor='None', markeredgewidth=2.5)
 
 # Express thousands with K in plot
 def thousands_formatter(x, pos):
