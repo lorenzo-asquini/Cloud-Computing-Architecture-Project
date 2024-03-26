@@ -24,21 +24,26 @@ def plot_file(filename, marker):
     x = [row[0] for row in data]
     xerr_std = [row[1] for row in data]
     y = [row[2]/1000 for row in data]  # Transform into ms
-    yerr_std = [row[3]/1000 for row in data] 
+    yerr_std = [row[3]/1000 for row in data]
+
+    #Insert a line to fit the data
+    y_fit = [0.5+(64/50000)*qps*0.011 for qps in x]
 
     base_name = os.path.basename(filename)
     main_name = base_name.split('_')[0]
 
-    plt.errorbar(x, y, xerr=xerr_std, yerr=yerr_std, capsize=8, label=main_name, linewidth=2.5,
+    plt.errorbar(x, y, xerr=xerr_std, yerr=yerr_std, capsize=8, label="No interference", linewidth=2.5,
                  marker=marker, markersize=8, markerfacecolor='None', markeredgewidth=2.5)
+
+    plt.errorbar(x, y_fit, linewidth=2.5, label="Theoretical Response Time")
 
 # Express thousands with K in plot
 def thousands_formatter(x, pos):
     return '{:.0f}K'.format(x * 1e-3)
 
 # Main names of the files
-interferences = ["none", "cpu", "l1d", "l1i", "l2", "llc", "membw"]
-markers = ['o', 'v', '1', 's', 'p', '*', 'X']
+interferences = ["none"]
+markers = ['o']
 
 # Plotting
 plt.figure()
@@ -56,7 +61,7 @@ plt.ylabel('95th Percentile Latency (ms)', fontdict=axis_label_font)
 ## Title
 title_font = {'fontsize': 14, 'fontweight': 'bold'}
 plt.title('''
-95th Percentile Latency with Different Interferences\n
+95th Percentile Latency and Theoretical Response TIme\n
 Error Bars: Standard Deviation (3 repetitions per point)
 ''', fontdict=title_font, linespacing=0.5)
 
@@ -80,7 +85,7 @@ handles, labels = plt.gca().get_legend_handles_labels()
 handles = [h[0] for h in handles]  # Remove error bars from legend
 plt.gca().legend(handles, labels, fontsize=13)
 
-plt.ylim(0, 8)
+plt.ylim(0, 3)
 plt.xlim(0, 55000)
 
 plt.show()
