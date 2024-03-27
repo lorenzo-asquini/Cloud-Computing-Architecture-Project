@@ -83,4 +83,6 @@ plt.gca().legend(handles, labels, fontsize=13)
 plt.ylim(0, 8)
 plt.xlim(0, 55000)
 
+# Borders work on full screen image
+plt.subplots_adjust(left=0.05, right=0.98, top=0.9, bottom=0.09)
 plt.show()

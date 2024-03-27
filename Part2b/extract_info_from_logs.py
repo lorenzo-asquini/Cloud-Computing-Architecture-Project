@@ -88,6 +88,8 @@ def main():
     ## Legend
     plt.legend(fontsize=13)
 
+    # Borders work on full screen image
+    plt.subplots_adjust(left=0.05, right=0.98, top=0.92, bottom=0.09)
     plt.show()
 
 
