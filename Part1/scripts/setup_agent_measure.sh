@@ -37,12 +37,12 @@ CLIENT_AGENT_NAME=`kubectl get nodes -o custom-columns=NAME:metadata.name | grep
 echo "#############################################"
 echo "# DEPLOYING ON $CLIENT_AGENT_NAME"
 echo "#############################################"
-gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY run_on_deployed.sh "ubuntu@$CLIENT_AGENT_NAME:/home/ubuntu/run_on_deployed.sh" --zone europe-west3-a
-gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_NAME" --zone europe-west3-a  -- 'cd /home/ubuntu && chmod 744 run_on_deployed.sh && ./run_on_deployed.sh'
+gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY remote_setup.sh "ubuntu@$CLIENT_AGENT_NAME:/home/ubuntu/remote_setup.sh" --zone europe-west3-a
+gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_NAME" --zone europe-west3-a  -- 'cd /home/ubuntu && chmod 744 remote_setup.sh && ./remote_setup.sh'
 
 CLIENT_MEASURE_NAME=`kubectl get nodes -o custom-columns=NAME:metadata.name | grep client-measure`
 echo "#############################################"
 echo "# DEPLOYING ON $CLIENT_MEASURE_NAME"
 echo "#############################################"
-gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY run_on_deployed.sh "ubuntu@$CLIENT_MEASURE_NAME:/home/ubuntu/run_on_deployed.sh" --zone europe-west3-a
-gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- 'cd /home/ubuntu && chmod 744 run_on_deployed.sh && ./run_on_deployed.sh'
+gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY remote_setup.sh "ubuntu@$CLIENT_MEASURE_NAME:/home/ubuntu/remote_setup.sh" --zone europe-west3-a
+gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- 'cd /home/ubuntu && chmod 744 remote_setup.sh && ./remote_setup.sh'

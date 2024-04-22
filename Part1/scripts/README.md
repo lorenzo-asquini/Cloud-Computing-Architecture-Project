@@ -6,10 +6,10 @@ If you get the error `-bash: ./file.sh: /bin/bash^M: bad interpreter: No such fi
 
 ## Start the cluster
 
-Move the file `setup.sh` in the folder `cloud-comp-arch-project`. \
+Move the file `deploy_cluster.sh` in the folder `cloud-comp-arch-project`. \
 Inside the file, change the values of the variables `KOPS_STATE_STORE` and `CCA_PROJECT_PUB_KEY` according to your configuration. The script will end if they are not set.
 
-Run the script with `./setup.sh`. If there is a permission denied error, run `chmod 744 setup.sh` in order to set the permission to execute the script.
+Run the script with `./deploy_cluster.sh`. If there is a permission denied error, run `chmod 744 deploy_cluster.sh` in order to set the permission to execute the script.
 
 Pay attention to possible errors. In particular, it is particularly possible that there may be some errors in setting up the SSH key. If so, run the command manually after the cluster is up (change the file name):
 ```
@@ -18,12 +18,12 @@ kops create secret --name part1.k8s.local sshpublickey admin -i ~/.ssh/file.pub
 
 ## Deploy memcached
 
-Move the file `deploy.sh` in the folder `cloud-comp-arch-project`. \
+Move the file `setup_agent_measure.sh` in the folder `cloud-comp-arch-project`. \
 Inside the file, change the value of the variable `CCA_PROJECT_PUB_KEY` according to your configuration. The script will end if it is not set or if the filename ends with `.pub`.
 
-Run the script with `./deploy.sh`. If there is a permission denied error, run `chmod 744 deploy.sh` in order to set the permission to execute the script.
+Run the script with `./setup_agent_measure.sh`. If there is a permission denied error, run `chmod 744 setup_agent_measure.sh` in order to set the permission to execute the script.
 
-This script will upload and run the script `run_on_deployed.sh` (which must be on the same folder) on the servers. It will ask multiple times for the SSH password if you have set a password for the key.
+This script will upload and run the script `remote_setup.sh` (which must be on the same folder) on the servers. It will ask multiple times for the SSH password if you have set a password for the key.
 
 ## Run the tests on all interferences for multiple times
 

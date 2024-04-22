@@ -6,10 +6,10 @@ If you get the error `-bash: ./file.sh: /bin/bash^M: bad interpreter: No such fi
 
 ## Start the cluster
 
-Move the file `setup.sh` in the folder `cloud-comp-arch-project`. \
+Move the file `deploy_cluster.sh` in the folder `cloud-comp-arch-project`. \
 Inside the file, change the value of the variable `KOPS_STATE_STORE` according to your configuration. The script will end if it is not set.
 
-Run the script with `./setup.sh`. If there is a permission denied error, run `chmod 744 setup.sh` in order to set the permission to execute the script.
+Run the script with `./deploy_cluster.sh`. If there is a permission denied error, run `chmod 744 deploy_cluster.sh` in order to set the permission to execute the script.
 
 Even if at the end it says that the parsec server was not labeled, it should still be ok.
 
