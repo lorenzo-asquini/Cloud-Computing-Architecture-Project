@@ -204,7 +204,7 @@ do
        [ ${benchmarks["vips","error"]} == true ] 
     then
            echo ERROR! ERROR! ERROR!
-           echo $JOBS_STATUS
+           echo $PODS_STATUS
            echo ERROR! ERROR! ERROR!
            break
     fi
