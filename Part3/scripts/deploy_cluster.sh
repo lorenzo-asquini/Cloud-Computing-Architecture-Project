@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set project variables
-./config.sh
+source ./config.sh
 
 # Exit if the variables are still the default ones
 if [ "$KOPS_STATE_STORE" == "$DEFAULT_KOPS_STATE_STORE" ]; then
