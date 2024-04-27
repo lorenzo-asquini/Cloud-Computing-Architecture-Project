@@ -192,13 +192,17 @@ do
         then
            echo "$jobtype is not yet finished"
            breakLoop=false
+           break
         fi
     done
 
     if [ $breakLoop == true ]
     then
-           break
+        break
     fi
+    
+    echo "Sleeping 5 seconds"
+    sleep 5
 done
 
 kubectl get pods -o json > results_${CURRENTEPOCTIME}.json
