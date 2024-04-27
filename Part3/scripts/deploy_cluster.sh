@@ -3,10 +3,6 @@
 DEFAULT_KOPS_STATE_STORE="gs://cca-eth-2024-group-XXX-ethzid/"
 DEFAULT_CCA_PROJECT_PUB_KEY="~/.ssh/file.pub"
 
-# Change these variables according to your configuration
-KOPS_STATE_STORE="gs://cca-eth-2024-group-XXX-ethzid/"
-CCA_PROJECT_PUB_KEY="~/.ssh/file.pub"
-
 # Exit if the variables are still the default ones
 if [ "$KOPS_STATE_STORE" == "$DEFAULT_KOPS_STATE_STORE" ]; then
     echo "KOPS STATE STORE value is still the placeholder one. Change it!"
@@ -20,6 +16,8 @@ fi
 
 echo "Using KOPS STATE STORE: $KOPS_STATE_STORE"
 echo "Using path to ssh pub key: $CCA_PROJECT_PUB_KEY"
+
+gsutil mb $KOPS_STATE_STORE
 
 # Assuming that the bucket was already created
 

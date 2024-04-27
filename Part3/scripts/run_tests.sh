@@ -1,9 +1,5 @@
 #!/bin/bash
 
-DEFAULT_CCA_PROJECT_PUB_KEY="~/.ssh/file"
-
-# Change this variables according to your configuration (do not add .pub at the end)
-CCA_PROJECT_PUB_KEY="~/.ssh/file"
 
 if [[ "$CCA_PROJECT_PUB_KEY" == *.pub ]]; then
     echo "Path to the SSH key ends with .pub. In this case, remove it!"
@@ -16,6 +12,7 @@ if [ "$CCA_PROJECT_PUB_KEY" == "$DEFAULT_CCA_PROJECT_PUB_KEY" ]; then
 fi
 
 CURRENTEPOCTIME=$(date +%s)
+echo "Current EPOCH is $CURRENTEPOCTIME"
 
 # Create folder for the outputs
 mkdir ../part3_raw_outputs
@@ -68,50 +65,55 @@ AGENT_B_INTERNAL_IP_ADDR=`kubectl get nodes -o wide | grep client-agent-b | awk 
 screen -d -m -S "LOAD_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- \
 "./memcache-perf-dynamic/mcperf -s $MEMCACHED_POD_IPADDR -a $AGENT_A_INTERNAL_IP_ADDR -a $AGENT_B_INTERNAL_IP_ADDR \
 --noload -T 6 -C 4 -D 4 -Q 1000 -c 4 -t 10 \
---scan 30000:30500:5" > ../part3_raw_outputs/mcperf_${CURRENTEPOCTIME}.txt
+--scan 30000:30500:5 > ./mcperf_${CURRENTEPOCTIME}.txt" &
 
 sleep 15
+
+echo "#############################################"
+echo "# SETTING UP STATE TRACKING"
+echo "#############################################"
+# Declare job types and states
+declare -a jobtypes=(blackscholes canneal dedup radix ferret freqmine vips)
+declare -a jobstates=(started finished error)
+declare -a jobstostartfirst=(blackscholes canneal dedup radix)
+
+stateGet() { 
+    local job=$1 state=$2
+    local i="jobtypes_${job}_${state}"
+    echo "${!i}"
+}
+
+finishedWithNoErrors() {
+    local job=$1
+    local jobFinishedState=$(stateGet $job finished)
+    local jobErrorState=$(stateGet $job error)
+    if [ $jobFinishedState == true ] && [ $jobErrorState == false ]
+    then
+        echo true
+    else
+        echo false
+    fi
+}
+
+# Set everything to false at first
+for jobtype in "${jobtypes[@]}"
+do
+    for jobstate in "${jobstates[@]}"
+    do
+        declare "jobtypes_${jobtype}_${jobstate}=false"
+    done
+done
 
 echo "#############################################"
 echo "# STARTING JOBS"
 echo "#############################################"
 
-# Start jobs at first
-kubectl create -f ../part3_yaml_files/benchmarks/parsec-blackscholes.yaml
-kubectl create -f ../part3_yaml_files/benchmarks/parsec-canneal.yaml
-kubectl create -f ../part3_yaml_files/benchmarks/parsec-dedup.yaml
-kubectl create -f ../part3_yaml_files/benchmarks/parsec-radix.yaml
-
-# Handle status. Each benchmark has: (started, finished, error)
-declare -A benchmarks
-
-benchmarks["blackscholes","started"]=true
-benchmarks["blackscholes","finished"]=false
-benchmarks["blackscholes","error"]=false
-
-benchmarks["canneal","started"]=true
-benchmarks["canneal","finished"]=false
-benchmarks["canneal","error"]=false
-
-benchmarks["dedup","started"]=true
-benchmarks["dedup","finished"]=false
-benchmarks["dedup","error"]=false
-
-benchmarks["radix","started"]=true
-benchmarks["radix","finished"]=false
-benchmarks["radix","error"]=false
-
-benchmarks["ferret","started"]=false
-benchmarks["ferret","finished"]=false
-benchmarks["ferret","error"]=false
-
-benchmarks["freqmine","started"]=false
-benchmarks["freqmine","finished"]=false
-benchmarks["freqmine","error"]=false
-
-benchmarks["vips","started"]=false
-benchmarks["vips","finished"]=false
-benchmarks["vips","error"]=false
+# Start initial jobs
+for jobtype in "${jobstostartfirst[@]}"
+do
+    kubectl create -f "../part3_yaml_files/benchmarks/parsec-${jobtype}.yaml"
+    declare "jobtypes_${jobtype}_started=true"
+done
 
 while true
 do
@@ -119,108 +121,84 @@ do
     PODS_STATUS=$(kubectl get pod)
     JOBS_STATUS=$(kubectl get jobs)
     
-    # Blackscholes
-    COMPLETE=$(echo "$JOBS_STATUS" | grep parsec-blackscholes | awk -v OFS='\t\t' '{print $2}')
-    benchmarks["blackscholes","finished"]=$([ "$COMPLETE" == "1/1" ] && echo true || echo false)  # Finish
-    STATUS=$(echo "$PODS_STATUS" | grep parsec-blackscholes | awk -v OFS='\t\t' '{print $3}')
-    benchmarks["blackscholes","error"]=$([ "$STATUS" == "Error" ] && echo true || echo false) # Error
+    for jobtype in "${jobtypes[@]}"
+    do
+        COMPLETE=$(echo "$JOBS_STATUS" | grep "parsec-$jobtype" | awk -v OFS='\t\t' '{print $2}')
+        FINISHED=$([ "$COMPLETE" == "1/1" ] && echo true || echo false)
+        declare "jobtypes_${jobtype}_finished=${FINISHED}"
 
-    # Canneal
-    COMPLETE=$(echo "$JOBS_STATUS" | grep parsec-canneal | awk -v OFS='\t\t' '{print $2}')
-    benchmarks["canneal","finished"]=$([ "$COMPLETE" == "1/1" ] && echo true || echo false)  # Finish
-    STATUS=$(echo "$PODS_STATUS" | grep parsec-canneal | awk -v OFS='\t\t' '{print $3}')
-    benchmarks["canneal","error"]=$([ "$STATUS" == "Error" ] && echo true || echo false) # Error
-
-    # Dedup
-    COMPLETE=$(echo "$JOBS_STATUS" | grep parsec-dedup | awk -v OFS='\t\t' '{print $2}')
-    benchmarks["dedup","finished"]=$([ "$COMPLETE" == "1/1" ] && echo true || echo false)  # Finish
-    STATUS=$(echo "$PODS_STATUS" | grep parsec-dedup | awk -v OFS='\t\t' '{print $3}')
-    benchmarks["dedup","error"]=$([ "$STATUS" == "Error" ] && echo true || echo false) # Error
-
-    # Radix
-    COMPLETE=$(echo "$JOBS_STATUS" | grep parsec-radix | awk -v OFS='\t\t' '{print $2}')
-    benchmarks["radix","finished"]=$([ "$COMPLETE" == "1/1" ] && echo true || echo false)  # Finish
-    STATUS=$(echo "$PODS_STATUS" | grep parsec-radix | awk -v OFS='\t\t' '{print $3}')
-    benchmarks["radix","error"]=$([ "$STATUS" == "Error" ] && echo true || echo false) # Error
+        STATUS=$(echo "$PODS_STATUS" | grep parsec-blackscholes | awk -v OFS='\t\t' '{print $3}')
+        ERROR=$([ "$STATUS" == "Error" ] && echo true || echo false)
+        declare "jobtypes_${jobtype}_error=${ERROR}"
+    done
 
     # Ferret
-
-    # Start Ferret if Canneal and Dedup have finished succesfully, and if it was not alCOMPLETE started
-    if [ ${benchmarks["canneal","finished"]} == true ] && [ ${benchmarks["canneal","error"]} == false ] && \
-       [ ${benchmarks["dedup","finished"]} == true ] && [ ${benchmarks["dedup","error"]} == false ] && \
-       [ ${benchmarks["ferret","started"]} == false ] 
+    # Start Ferret if Canneal and Dedup have finished succesfully, and if it was not already started
+    if [ $(finishedWithNoErrors canneal) == true ] && \
+       [ $(finishedWithNoErrors dedup) == true ] && \
+       [ $(stateGet ferret started) == false ] 
     then
         echo Starting Ferret!
         kubectl create -f ../part3_yaml_files/benchmarks/parsec-ferret.yaml
-        benchmarks["ferret","started"]=true
+        declare "jobtypes_ferret_started=true"
     fi
 
-    COMPLETE=$(echo "$JOBS_STATUS" | grep parsec-ferret | awk -v OFS='\t\t' '{print $2}')
-    benchmarks["ferret","finished"]=$([ "$COMPLETE" == "1/1" ] && echo true || echo false)  # Finish
-    STATUS=$(echo "$PODS_STATUS" | grep parsec-ferret | awk -v OFS='\t\t' '{print $3}')
-    benchmarks["ferret","error"]=$([ "$STATUS" == "Error" ] && echo true || echo false) # Error
-
     # Freqmine
-
-    # Start Freqmine if Radix has finished succesfully, and if it was not alCOMPLETE started
-    if [ ${benchmarks["radix","finished"]} == true ] && [ ${benchmarks["radix","error"]} == false ] && \
-       [ ${benchmarks["freqmine","started"]} == false ] 
+    # Start Freqmine if Radix has finished succesfully, and if it was not already started
+    if [ $(finishedWithNoErrors radix) == true ] && \
+       [ $(stateGet freqmine started) == false ] 
     then
         echo Starting Freqmine!
         kubectl create -f ../part3_yaml_files/benchmarks/parsec-freqmine.yaml
-        benchmarks["freqmine","started"]=true
+        declare "jobtypes_freqmine_started=true"
     fi
 
-    COMPLETE=$(echo "$JOBS_STATUS" | grep parsec-freqmine | awk -v OFS='\t\t' '{print $2}')
-    benchmarks["freqmine","finished"]=$([ "$COMPLETE" == "1/1" ] && echo true || echo false)  # Finish
-    STATUS=$(echo "$PODS_STATUS" | grep parsec-freqmine | awk -v OFS='\t\t' '{print $3}')
-    benchmarks["freqmine","error"]=$([ "$STATUS" == "Error" ] && echo true || echo false) # Error
-
     # Vips
-
-    # Start Vips if Radix and Freqmine has finished succesfully, and if it was not alCOMPLETE started
-
-    if [ ${benchmarks["radix","finished"]} == true ] && [ ${benchmarks["radix","error"]} == false ] && \
-       [ ${benchmarks["freqmine","finished"]} == true ] && [ ${benchmarks["freqmine","error"]} == false ] && \
-       [ ${benchmarks["vips","started"]} == false ] 
+    # Start Vips if Radix and Freqmine has finished succesfully, and if it was not already started
+    if [ $(finishedWithNoErrors radix) == true ] && \
+       [ $(finishedWithNoErrors freqmine) == true ] && \
+       [ $(stateGet vips started) == false ] 
     then
         echo Starting Vips!
         kubectl create -f ../part3_yaml_files/benchmarks/parsec-vips.yaml
-        benchmarks["vips","started"]=true
+        declare "jobtypes_vips_started=true"
     fi
 
-    COMPLETE=$(echo "$JOBS_STATUS" | grep parsec-vips | awk -v OFS='\t\t' '{print $2}')
-    benchmarks["vips","finished"]=$([ "$COMPLETE" == "1/1" ] && echo true || echo false)  # Finish
-    STATUS=$(echo "$PODS_STATUS" | grep parsec-vips | awk -v OFS='\t\t' '{print $3}')
-    benchmarks["vips","error"]=$([ "$STATUS" == "Error" ] && echo true || echo false) # Error
-
+    breakLoop=false
     # Check if no errors
-    if [ ${benchmarks["blackscholes","error"]} == true ] || \
-       [ ${benchmarks["canneal","error"]} == true ] || \
-       [ ${benchmarks["dedup","error"]} == true ] || \
-       [ ${benchmarks["radix","error"]} == true ] || \
-       [ ${benchmarks["ferret","error"]} == true ] || \
-       [ ${benchmarks["freqmine","error"]} == true ] || \
-       [ ${benchmarks["vips","error"]} == true ] 
-    then
+    for jobtype in "${jobtypes[@]}"
+    do
+        if [ $(stateGet $jobtype error) == true ]
+        then
            echo ERROR! ERROR! ERROR!
            echo $PODS_STATUS
            echo ERROR! ERROR! ERROR!
+
+           breakLoop=true
            break
+        fi
+    done
+
+    if [ $breakLoop == true ]
+    then
+        break
     fi
 
     # Check if all done
-    if [ ${benchmarks["blackscholes","finished"]} == true ] && \
-       [ ${benchmarks["canneal","finished"]} == true ] && \
-       [ ${benchmarks["dedup","finished"]} == true ] && \
-       [ ${benchmarks["radix","finished"]} == true ] && \
-       [ ${benchmarks["ferret","finished"]} == true ] && \
-       [ ${benchmarks["freqmine","finished"]} == true ] && \
-       [ ${benchmarks["vips","finished"]} == true ] 
+    breakLoop=true
+    for jobtype in "${jobtypes[@]}"
+    do
+        if [ $(stateGet $jobtype finished) == false ]
+        then
+           echo "$jobtype is not yet finished"
+           breakLoop=false
+        fi
+    done
+
+    if [ $breakLoop == true ]
     then
            break
     fi
-
 done
 
 kubectl get pods -o json > results_${CURRENTEPOCTIME}.json
@@ -243,3 +221,8 @@ echo "#############################################"
 echo "# CURRENT RUNNING DETTACHED"
 echo "#############################################"
 screen -ls
+
+echo "#############################################"
+echo "# GETTING MCPERF DATA"
+echo "#############################################"
+gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_NAME:/home/ubuntu/mcperf_${CURRENTEPOCTIME}.txt" ../part3_raw_outputs/mcperf_${CURRENTEPOCTIME}.txt --zone europe-west3-a
