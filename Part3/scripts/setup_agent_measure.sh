@@ -1,10 +1,6 @@
 #!/bin/bash
 
-DEFAULT_CCA_PROJECT_PUB_KEY="~/.ssh/file"
-
-# Change this variables according to your configuration (do not add .pub at the end)
-CCA_PROJECT_PUB_KEY="~/.ssh/file"
-
+CCA_PROJECT_PUB_KEY=${CCA_PROJECT_PUB_KEY::-4} #Remove .pub
 if [[ "$CCA_PROJECT_PUB_KEY" == *.pub ]]; then
     echo "Path to the SSH key ends with .pub. In this case, remove it!"
     exit 1
