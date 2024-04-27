@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set project variables
-./config.sh
+source ./config.sh
 
 CCA_PROJECT_PUB_KEY=${CCA_PROJECT_PUB_KEY::-4} #Remove .pub
 if [[ "$CCA_PROJECT_PUB_KEY" == *.pub ]]; then
