@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+CCA_PROJECT_PUB_KEY=${CCA_PROJECT_PUB_KEY::-4} #Remove .pub
 if [[ "$CCA_PROJECT_PUB_KEY" == *.pub ]]; then
     echo "Path to the SSH key ends with .pub. In this case, remove it!"
     exit 1
