@@ -17,18 +17,16 @@ fi
 echo "Using KOPS STATE STORE: $KOPS_STATE_STORE"
 echo "Using path to ssh pub key: $CCA_PROJECT_PUB_KEY"
 
-gsutil mb $KOPS_STATE_STORE
-
 # Assuming that the bucket was already created
 
 PROJECT=`gcloud config get-value project`
 
-kops create -f ../part3_yaml_files/part3_cheap.yaml
+kops create -f ../yaml_files/part4_cheap.yaml
 
 # This may give an error. If so, run it independently
-kops create secret --name part3.k8s.local sshpublickey admin -i $CCA_PROJECT_PUB_KEY
+kops create secret --name part4.k8s.local sshpublickey admin -i $CCA_PROJECT_PUB_KEY
 
-kops update cluster --name part3.k8s.local --yes --admin
+kops update cluster --name part4.k8s.local --yes --admin
 
 kops validate cluster --wait 10m
 
