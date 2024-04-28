@@ -1,5 +1,7 @@
 # How to use the scripts
 
+Modify the values according to your configuration in `config.sh`.
+
 If you get the error `-bash: ./file.sh: /bin/bash^M: bad interpreter: No such file or directory`, it is caused by some incompatibilities between newlines in Windows and Linux. In order to easily solve the problem, run the command `sed -i -e 's/\r$//' file.sh`.
 
 The script work assuming that they are located in the folder `scripts` and that its parent folder contains the folder `part3_yaml_files`.
@@ -9,7 +11,6 @@ No need to move files or folders in `cloud-comp-arch-project`.
 ## Start the cluster
 
 Consider the file `deploy_cluster.sh`. \
-Inside the file, change the values of the variables `KOPS_STATE_STORE` and `CCA_PROJECT_PUB_KEY` according to your configuration. The script will end if they are not set. \
 Change the deployment between the cheap cluster and the official cluster according to the needs.
 
 Run the script with `./deploy_cluster.sh`. If there is a permission denied error, run `chmod 744 deploy_cluster.sh` in order to set the permission to execute the script.
@@ -21,8 +22,7 @@ kops create secret --name part3.k8s.local sshpublickey admin -i ~/.ssh/file.pub
 
 ## Deploy memcached
 
-Move the file `setup_agent_measure.sh`. \
-Inside the file, change the value of the variable `CCA_PROJECT_PUB_KEY` according to your configuration. The script will end if it is not set or if the filename ends with `.pub`.
+Consider the file `setup_agent_measure.sh`. \
 
 Run the script with `./setup_agent_measure.sh`. If there is a permission denied error, run `chmod 744 setup_agent_measure.sh` in order to set the permission to execute the script.
 
@@ -30,7 +30,6 @@ This script will upload and run the script `remote_setup.sh` (which must be on t
 
 ## Run the tests on all interferences for multiple times
 
-Move the file `run_tests.sh`. \
-Inside the file, change the value of the variable `CCA_PROJECT_PUB_KEY` according to your configuration. The script will end if it is not set or if the filename ends with `.pub`.
+Consider the file `run_tests.sh`. \
 
 Run the script with `./run_tests.sh`. If there is a permission denied error, run `chmod 744 run_tests.sh` in order to set the permission to execute the script.
