@@ -1,21 +1,25 @@
 #!/bin/bash
 
+logEcho() {
+    echo $(date -u) "||| $1"
+}
+
 # Set project variables
 source ./config.sh
 
 CCA_PROJECT_PUB_KEY=${CCA_PROJECT_PUB_KEY::-4} #Remove .pub
 if [[ "$CCA_PROJECT_PUB_KEY" == *.pub ]]; then
-    echo "Path to the SSH key ends with .pub. In this case, remove it!"
+    logEcho "Path to the SSH key ends with .pub. In this case, remove it!"
     exit 1
 fi
 
 if [ "$CCA_PROJECT_PUB_KEY" == "$DEFAULT_CCA_PROJECT_PUB_KEY" ]; then
-    echo "SSH PUB KEY value is still the placeholder one. Change it!"
+    logEcho "SSH PUB KEY value is still the placeholder one. Change it!"
     exit 1
 fi
 
 CURRENTEPOCTIME=$(date +%s)
-echo "Current EPOCH is $CURRENTEPOCTIME"
+logEcho "Current EPOCH is $CURRENTEPOCTIME"
 
 # Create folder for the outputs
 mkdir ../part3_raw_outputs
@@ -24,44 +28,44 @@ mkdir ../part3_raw_outputs
 mkdir ~/.screen && chmod 700 ~/.screen
 export SCREENDIR=$HOME/.screen
 
-echo "#############################################"
-echo "# RETRIEVING POD IP ADDR"
+logEcho "#############################################"
+logEcho "# RETRIEVING POD IP ADDR"
 MEMCACHED_POD_IPADDR=`kubectl get pod some-memcached -o custom-columns=IP:status.podIP | head -2 | tail -1`
-echo "# ADDR: $MEMCACHED_POD_IPADDR"
-echo "#############################################"
+logEcho "# ADDR: $MEMCACHED_POD_IPADDR"
+logEcho "#############################################"
 
-echo "#############################################"
-echo "# RETRIEVING NODE NAMES"
+logEcho "#############################################"
+logEcho "# RETRIEVING NODE NAMES"
 CLIENT_AGENT_A_NAME=`kubectl get nodes -o custom-columns=NAME:metadata.name | grep client-agent-a`
 CLIENT_AGENT_B_NAME=`kubectl get nodes -o custom-columns=NAME:metadata.name | grep client-agent-b`
 CLIENT_MEASURE_NAME=`kubectl get nodes -o custom-columns=NAME:metadata.name | grep client-measure`
-echo "# AGENT: $CLIENT_AGENT_A_NAME"
-echo "# AGENT: $CLIENT_AGENT_B_NAME"
-echo "# MEASURE: $CLIENT_MEASURE_NAME"
-echo "#############################################"
+logEcho "# AGENT: $CLIENT_AGENT_A_NAME"
+logEcho "# AGENT: $CLIENT_AGENT_B_NAME"
+logEcho "# MEASURE: $CLIENT_MEASURE_NAME"
+logEcho "#############################################"
 
-echo "#############################################"
-echo "# STARTING MCPERF ON $CLIENT_AGENT_A_NAME"
-echo "#############################################"
+logEcho "#############################################"
+logEcho "# STARTING MCPERF ON $CLIENT_AGENT_A_NAME"
+logEcho "#############################################"
 screen -d -m -S "AGENT_A_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_A_NAME" --zone europe-west3-a  -- './memcache-perf-dynamic/mcperf -T 2 -A' &
 
-echo "#############################################"
-echo "# STARTING MCPERF ON $CLIENT_AGENT_B_NAME"
-echo "#############################################"
+logEcho "#############################################"
+logEcho "# STARTING MCPERF ON $CLIENT_AGENT_B_NAME"
+logEcho "#############################################"
 screen -d -m -S "AGENT_B_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_B_NAME" --zone europe-west3-a  -- './memcache-perf-dynamic/mcperf -T 4 -A' &
 
 sleep 15
 
-echo "#############################################"
-echo "# LOAD MEMCACHE DB AND THEN WAITING 15 SECONDS"
-echo "#############################################"
+logEcho "#############################################"
+logEcho "# LOAD MEMCACHE DB AND THEN WAITING 15 SECONDS"
+logEcho "#############################################"
 gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- "./memcache-perf-dynamic/mcperf -s $MEMCACHED_POD_IPADDR --loadonly"
 
 sleep 15
 
-echo "#############################################"
-echo "# RUNNING QUERIES AND THEN WAITING 15 SECONDS"
-echo "#############################################"
+logEcho "#############################################"
+logEcho "# RUNNING QUERIES AND THEN WAITING 15 SECONDS"
+logEcho "#############################################"
 AGENT_A_INTERNAL_IP_ADDR=`kubectl get nodes -o wide | grep client-agent-a | awk -v OFS='\t\t' '{print $6}'`
 AGENT_B_INTERNAL_IP_ADDR=`kubectl get nodes -o wide | grep client-agent-b | awk -v OFS='\t\t' '{print $6}'`
 
@@ -72,13 +76,24 @@ screen -d -m -S "LOAD_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB
 
 sleep 15
 
-echo "#############################################"
-echo "# SETTING UP STATE TRACKING"
-echo "#############################################"
+logEcho "#############################################"
+logEcho "# SETTING UP STATE TRACKING"
+logEcho "#############################################"
 # Declare job types and states
 declare -a jobtypes=(blackscholes canneal dedup radix ferret freqmine vips)
 declare -a jobstates=(started finished error)
-declare -a jobstostartfirst=(blackscholes canneal dedup radix)
+
+logEcho "#############################################"
+logEcho "# DECLARING DEPENDENCIES"
+logEcho "#############################################"
+# Declare job inter dependencies
+declare -a blackscholes_dependencies=()
+declare -a canneal_dependencies=()
+declare -a dedup_dependencies=()
+declare -a radix_dependencies=()
+declare -a ferret_dependencies=(canneal dedup)
+declare -a freqmine_dependencies=(radix)
+declare -a vips_dependencies=(radix freqmine)
 
 stateGet() { 
     local job=$1 state=$2
@@ -98,6 +113,28 @@ finishedWithNoErrors() {
     fi
 }
 
+canStartJob() {
+    local job=$1
+    local deps_addr="${job}_dependencies"
+    local deps_array="${deps_addr}[@]"
+
+    if [ $(stateGet $job started) == false ]
+    then
+        local canStart=true
+        for job_dep in "${!deps_array}"
+        do
+            if [ $(finishedWithNoErrors $job_dep) == false ]
+            then
+                canStart=false
+                break
+            fi
+        done
+        echo $canStart
+    else
+        echo false
+    fi
+}
+
 # Set everything to false at first
 for jobtype in "${jobtypes[@]}"
 do
@@ -107,9 +144,9 @@ do
     done
 done
 
-echo "#############################################"
-echo "# STARTING JOBS"
-echo "#############################################"
+logEcho "#############################################"
+logEcho "# STARTING JOBS"
+logEcho "#############################################"
 
 # Start initial jobs
 for jobtype in "${jobstostartfirst[@]}"
@@ -126,6 +163,13 @@ do
     
     for jobtype in "${jobtypes[@]}"
     do
+        if [ $(canStartJob $jobtype) == true ]
+        then
+            logEcho "Starting $jobtype!"
+            kubectl create -f "../part3_yaml_files/benchmarks/parsec-$jobtype.yaml"
+            declare "jobtypes_${jobtype}_started=true"
+        fi
+
         COMPLETE=$(echo "$JOBS_STATUS" | grep "parsec-$jobtype" | awk -v OFS='\t\t' '{print $2}')
         FINISHED=$([ "$COMPLETE" == "1/1" ] && echo true || echo false)
         declare "jobtypes_${jobtype}_finished=${FINISHED}"
@@ -135,47 +179,16 @@ do
         declare "jobtypes_${jobtype}_error=${ERROR}"
     done
 
-    # Ferret
-    # Start Ferret if Canneal and Dedup have finished succesfully, and if it was not already started
-    if [ $(finishedWithNoErrors canneal) == true ] && \
-       [ $(finishedWithNoErrors dedup) == true ] && \
-       [ $(stateGet ferret started) == false ] 
-    then
-        echo Starting Ferret!
-        kubectl create -f ../part3_yaml_files/benchmarks/parsec-ferret.yaml
-        declare "jobtypes_ferret_started=true"
-    fi
-
-    # Freqmine
-    # Start Freqmine if Radix has finished succesfully, and if it was not already started
-    if [ $(finishedWithNoErrors radix) == true ] && \
-       [ $(stateGet freqmine started) == false ] 
-    then
-        echo Starting Freqmine!
-        kubectl create -f ../part3_yaml_files/benchmarks/parsec-freqmine.yaml
-        declare "jobtypes_freqmine_started=true"
-    fi
-
-    # Vips
-    # Start Vips if Radix and Freqmine has finished succesfully, and if it was not already started
-    if [ $(finishedWithNoErrors radix) == true ] && \
-       [ $(finishedWithNoErrors freqmine) == true ] && \
-       [ $(stateGet vips started) == false ] 
-    then
-        echo Starting Vips!
-        kubectl create -f ../part3_yaml_files/benchmarks/parsec-vips.yaml
-        declare "jobtypes_vips_started=true"
-    fi
-
     breakLoop=false
     # Check if no errors
     for jobtype in "${jobtypes[@]}"
     do
         if [ $(stateGet $jobtype error) == true ]
         then
-           echo ERROR! ERROR! ERROR!
-           echo $PODS_STATUS
-           echo ERROR! ERROR! ERROR!
+           logEcho "Job $jobtype has errors."
+           logEcho ERROR! ERROR! ERROR!
+           logEcho $PODS_STATUS
+           logEcho ERROR! ERROR! ERROR!
 
            breakLoop=true
            break
@@ -193,7 +206,7 @@ do
     do
         if [ $(stateGet $jobtype finished) == false ]
         then
-           echo "$jobtype is not yet finished"
+           logEcho "$jobtype is not yet finished"
            breakLoop=false
            break
         fi
@@ -201,35 +214,36 @@ do
 
     if [ $breakLoop == true ]
     then
+        logEcho "All jobs succesfully completed."
         break
     fi
     
-    echo "Sleeping 5 seconds"
+    logEcho "Sleeping 5 seconds"
     sleep 5
 done
 
 kubectl get pods -o json > results_${CURRENTEPOCTIME}.json
 
-echo "#############################################"
-echo "# KILLING ALL JOBS"
-echo "#############################################"
+logEcho "#############################################"
+logEcho "# KILLING ALL JOBS"
+logEcho "#############################################"
 kubectl delete jobs --all
 
-echo "#############################################"
-echo "# KILL DETACHED MCPERF"
-echo "#############################################"
+logEcho "#############################################"
+logEcho "# KILL DETACHED MCPERF"
+logEcho "#############################################"
 DETACHED_PROC=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_A_NAME" --zone europe-west3-a  -- 'ps -aux | grep mcperf | head -1' | awk '{print $2}')
 gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_A_NAME" --zone europe-west3-a  -- "kill $DETACHED_PROC"
 
 DETACHED_PROC=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_B_NAME" --zone europe-west3-a  -- 'ps -aux | grep mcperf | head -1' | awk '{print $2}')
 gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_B_NAME" --zone europe-west3-a  -- "kill $DETACHED_PROC"
 
-echo "#############################################"
-echo "# CURRENT RUNNING DETTACHED"
-echo "#############################################"
+logEcho "#############################################"
+logEcho "# CURRENT RUNNING DETTACHED"
+logEcho "#############################################"
 screen -ls
 
-echo "#############################################"
-echo "# GETTING MCPERF DATA"
-echo "#############################################"
-gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_NAME:/home/ubuntu/mcperf_${CURRENTEPOCTIME}.txt" ../part3_raw_outputs/mcperf_${CURRENTEPOCTIME}.txt --zone europe-west3-a
+logEcho "#############################################"
+logEcho "# GETTING MCPERF DATA"
+logEcho "#############################################"
+gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME:/home/ubuntu/mcperf_${CURRENTEPOCTIME}.txt" ../part3_raw_outputs/mcperf_${CURRENTEPOCTIME}.txt --zone europe-west3-a
