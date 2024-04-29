@@ -68,10 +68,13 @@ logfile /var/log/memcached.log
         echo "#############################################"
         echo "# SET THE NEW MEMCACHE CONFIGURATION WITH $threads THREADS AND $cores CORES"
         echo "#############################################"
-        gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "echo "$memcache_configuration" | sudo tee /etc/memcached.conf"
+        gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "echo '$memcache_configuration' | sudo tee /etc/memcached.conf"
+        echo "Restarting memcached and sleeping 5 seconds"
         gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo systemctl restart memcached"
-        gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo taskset -a -cp $cores $(cat /var/run/memcached/memcached.pid)"
-
+        sleep 5
+        MEMCACHED_PID=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "cat /var/run/memcached/memcached.pid" | tr -d '\r')
+        gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo taskset -a -cp $cores $MEMCACHED_PID"
+  
         for ((iteration=0; iteration<RUN_TIMES; iteration++)); do
 
             echo "#############################################"
