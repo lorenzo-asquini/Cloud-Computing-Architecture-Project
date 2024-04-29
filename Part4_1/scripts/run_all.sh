@@ -41,14 +41,9 @@ echo "#############################################"
 echo "#############################################"
 echo "# STARTING MCPERF ON $CLIENT_AGENT_NAME" AND WAITING 15 SECONDS
 echo "#############################################"
-screen -d -m -S "AGENT_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_NAME" --zone europe-west3-a  -- './memcache-perf/mcperf -T 16 -A' &
+screen -d -m -S "AGENT_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_NAME" --zone europe-west3-a  -- './memcache-perf-dynamic/mcperf -T 16 -A' &
 
 sleep 15
-
-echo "#############################################"
-echo "# LOAD MEMCACHE DB"
-echo "#############################################"
-gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- "./memcache-perf-dynamic/mcperf -s $MEMCACHE_IPADDR --loadonly"
 
 for threads in 1 2; do
     for cores in "0" "0-1"; do
@@ -69,7 +64,8 @@ logfile /var/log/memcached.log
         echo "# SET THE NEW MEMCACHE CONFIGURATION WITH $threads THREADS AND $cores CORES"
         echo "#############################################"
         gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "echo '$memcache_configuration' | sudo tee /etc/memcached.conf"
-        echo "Restarting memcached and sleeping 5 seconds"
+        echo "Sleeping 5 seconds, restarting memcached and sleeping 5 seconds"
+        sleep 5
         gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo systemctl restart memcached"
         sleep 5
         MEMCACHED_PID=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "cat /var/run/memcached/memcached.pid" | tr -d '\r')
@@ -80,10 +76,12 @@ logfile /var/log/memcached.log
             echo "#############################################"
             echo "# RUNNING QUERIES"
             echo "#############################################"
+            gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- "./memcache-perf-dynamic/mcperf -s $MEMCACHE_IPADDR --loadonly"
+
             AGENT_INTERNAL_IP_ADDR=`kubectl get nodes -o wide | grep client-agent | awk -v OFS='\t\t' '{print $6}'`
             gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- \
             "./memcache-perf-dynamic/mcperf -s $MEMCACHE_IPADDR -a $AGENT_INTERNAL_IP_ADDR \
-            --noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 5 -w 2 \
+            --noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 5 \
             --scan 5000:125000:5000" > part4_1_raw_outputs/threads=${threads}_cores=${cores}_${iteration}.txt
         done
     done
