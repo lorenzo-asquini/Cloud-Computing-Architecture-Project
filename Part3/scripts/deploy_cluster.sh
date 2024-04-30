@@ -23,7 +23,7 @@ gsutil mb $KOPS_STATE_STORE
 
 PROJECT=`gcloud config get-value project`
 
-kops create -f ../part3_yaml_files/part3_cheap.yaml
+kops create -f ../part3_yaml_files/part3.yaml
 
 # This may give an error. If so, run it independently
 kops create secret --name part3.k8s.local sshpublickey admin -i $CCA_PROJECT_PUB_KEY

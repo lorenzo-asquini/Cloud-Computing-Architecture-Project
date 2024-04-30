@@ -91,7 +91,7 @@ declare -a blackscholes_dependencies=()
 declare -a canneal_dependencies=()
 declare -a dedup_dependencies=()
 declare -a radix_dependencies=()
-declare -a ferret_dependencies=(canneal dedup)
+declare -a ferret_dependencies=(dedup)
 declare -a freqmine_dependencies=(radix)
 declare -a vips_dependencies=(radix freqmine)
 
