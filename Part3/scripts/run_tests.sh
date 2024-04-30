@@ -64,7 +64,7 @@ gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_N
 sleep 15
 
 logEcho "#############################################"
-logEcho "# RUNNING QUERIES AND THEN WAITING 15 SECONDS"
+logEcho "# RUNNING QUERIES AND THEN WAITING 5 SECONDS"
 logEcho "#############################################"
 AGENT_A_INTERNAL_IP_ADDR=`kubectl get nodes -o wide | grep client-agent-a | awk -v OFS='\t\t' '{print $6}'`
 AGENT_B_INTERNAL_IP_ADDR=`kubectl get nodes -o wide | grep client-agent-b | awk -v OFS='\t\t' '{print $6}'`
@@ -74,7 +74,7 @@ screen -d -m -S "LOAD_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB
 --noload -T 6 -C 4 -D 4 -Q 1000 -c 4 -t 10 \
 --scan 30000:30500:5 > ./mcperf_${CURRENTEPOCTIME}.txt" &
 
-sleep 15
+sleep 5
 
 logEcho "#############################################"
 logEcho "# SETTING UP STATE TRACKING"
@@ -206,7 +206,7 @@ do
     do
         if [ $(stateGet $jobtype finished) == false ]
         then
-           logEcho "$jobtype is not yet finished"
+           logEcho "At least $jobtype is not yet finished"
            breakLoop=false
            break
         fi
@@ -218,11 +218,12 @@ do
         break
     fi
     
-    logEcho "Sleeping 5 seconds"
-    sleep 5
+    sleep 1
 done
 
-kubectl get pods -o json > results_${CURRENTEPOCTIME}.json
+kubectl get pods -o json > ../part3_raw_outputs/pod_results_${CURRENTEPOCTIME}.json
+
+sleep 5
 
 logEcho "#############################################"
 logEcho "# KILLING ALL JOBS"
@@ -244,6 +245,6 @@ logEcho "#############################################"
 screen -ls
 
 logEcho "#############################################"
-logEcho "# GETTING MCPERF DATA"
+logEcho "# GETTING MCPERF DATA FROM SERVER"
 logEcho "#############################################"
 gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME:/home/ubuntu/mcperf_${CURRENTEPOCTIME}.txt" ../part3_raw_outputs/mcperf_${CURRENTEPOCTIME}.txt --zone europe-west3-a
