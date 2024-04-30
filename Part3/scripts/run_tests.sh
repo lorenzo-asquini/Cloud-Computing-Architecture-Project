@@ -64,7 +64,7 @@ gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_N
 sleep 15
 
 logEcho "#############################################"
-logEcho "# RUNNING QUERIES AND THEN WAITING 5 SECONDS"
+logEcho "# RUNNING QUERIES AND THEN WAITING 15 SECONDS"
 logEcho "#############################################"
 AGENT_A_INTERNAL_IP_ADDR=`kubectl get nodes -o wide | grep client-agent-a | awk -v OFS='\t\t' '{print $6}'`
 AGENT_B_INTERNAL_IP_ADDR=`kubectl get nodes -o wide | grep client-agent-b | awk -v OFS='\t\t' '{print $6}'`
@@ -74,7 +74,7 @@ screen -d -m -S "LOAD_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB
 --noload -T 6 -C 4 -D 4 -Q 1000 -c 4 -t 10 \
 --scan 30000:30500:5 > ./mcperf_${CURRENTEPOCTIME}.txt" &
 
-sleep 5
+sleep 15
 
 logEcho "#############################################"
 logEcho "# SETTING UP STATE TRACKING"
