@@ -26,11 +26,11 @@ for index in range(1, 4):
             try:
                 start_time = float(datetime.strptime(
                         item['status']['containerStatuses'][0]['state']['terminated']['startedAt'],
-                        time_format).strftime('%s.%f'))
+                        time_format).strftime('%s.%f')) + 7200  # Fix for time zone
                 
                 completion_time = float(datetime.strptime(
                         item['status']['containerStatuses'][0]['state']['terminated']['finishedAt'],
-                        time_format).strftime('%s.%f'))
+                        time_format).strftime('%s.%f')) + 7200  # Fix for time zone
                 
                 output_file.write(f"{completion_time - start_time},{start_time*1000},{completion_time*1000}\n")  # Start and End in ms
                 start_times.append(start_time)
