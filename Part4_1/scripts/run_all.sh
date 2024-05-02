@@ -17,7 +17,7 @@ fi
 RUN_TIMES=3
 
 # Create folder for the outputs
-mkdir part4_1_raw_outputs
+mkdir ../part4_1_raw_outputs
 
 # Allows running a program remotely infinitely without keeping the connection open
 mkdir ~/.screen && chmod 700 ~/.screen
@@ -82,7 +82,7 @@ logfile /var/log/memcached.log
             gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- \
             "./memcache-perf-dynamic/mcperf -s $MEMCACHE_IPADDR -a $AGENT_INTERNAL_IP_ADDR \
             --noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 5 \
-            --scan 5000:125000:5000" > part4_1_raw_outputs/threads=${threads}_cores=${cores}_${iteration}.txt
+            --scan 5000:125000:5000" > ../part4_1_raw_outputs/threads-${threads}_cores-${cores}_${iteration}.txt
         done
     done
 done
