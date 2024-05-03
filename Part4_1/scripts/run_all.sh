@@ -74,6 +74,12 @@ logfile /var/log/memcached.log
         for ((iteration=0; iteration<RUN_TIMES; iteration++)); do
 
             echo "#############################################"
+            echo "# START MEASURING CPU USAGE"
+            echo "#############################################"
+            screen -d -m -S "GET_CPU_MEMCACHE" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "python3 get_cpu.py > ./cpu_usage_threads-${threads}_cores-${cores}_${iteration}.txt" &
+            sleep 2
+
+            echo "#############################################"
             echo "# RUNNING QUERIES"
             echo "#############################################"
             gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- "./memcache-perf-dynamic/mcperf -s $MEMCACHE_IPADDR --loadonly"
@@ -83,6 +89,14 @@ logfile /var/log/memcached.log
             "./memcache-perf-dynamic/mcperf -s $MEMCACHE_IPADDR -a $AGENT_INTERNAL_IP_ADDR \
             --noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 5 \
             --scan 5000:125000:5000" > ../part4_1_raw_outputs/threads-${threads}_cores-${cores}_${iteration}.txt
+
+            echo "#############################################"
+            echo "# KILL DETACHED CPU USAGE MEASURING AND RETRIEVE RESULTS"
+            echo "#############################################"
+            DETACHED_PROC=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- 'ps -aux | grep python3 | head -1' | awk '{print $2}')
+            gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "kill $DETACHED_PROC"
+            gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/*.txt" ../part4_1_raw_outputs --zone europe-west3-a
+
         done
     done
 done

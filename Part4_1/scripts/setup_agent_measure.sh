@@ -40,3 +40,4 @@ echo "# DEPLOYING ON $MEMCACHE_SERVER_NAME"
 echo "#############################################"
 gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY remote_setup_memcache.sh "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/remote_setup_memcache.sh" --zone europe-west3-a
 gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "cd /home/ubuntu && chmod 744 remote_setup_memcache.sh && ./remote_setup_memcache.sh $MEMCACHE_IPADDR"
+gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY get_cpu.py "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/get_cpu.py" --zone europe-west3-a
