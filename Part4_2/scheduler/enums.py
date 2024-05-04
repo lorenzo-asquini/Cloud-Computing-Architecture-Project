@@ -26,3 +26,7 @@ class ContainerState(enum.Enum):
         if key:
             return cls[key]
         return cls.UNKNOWN
+    
+    @classmethod
+    def isInProgress(cls, status):
+        return status in [ContainerState.CREATED, ContainerState.RUNNING]
