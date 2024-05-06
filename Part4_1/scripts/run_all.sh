@@ -93,9 +93,9 @@ logfile /var/log/memcached.log
             echo "#############################################"
             echo "# KILL DETACHED CPU USAGE MEASURING AND RETRIEVE RESULTS"
             echo "#############################################"
-            DETACHED_PROC=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- 'ps -aux | grep python3 | head -1' | awk '{print $2}')
+            DETACHED_PROC=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- 'ps -aux | grep "python3 get_cpu.py" | head -1' | awk '{print $2}')
             gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "kill $DETACHED_PROC"
-            gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/*.txt" ../part4_1_raw_outputs --zone europe-west3-a
+            gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/cpu_usage_threads-${threads}_cores-${cores}_${iteration}.txt" ../part4_1_raw_outputs/cpu_usage_threads-${threads}_cores-${cores}_${iteration}.txt --zone europe-west3-a
 
         done
     done
