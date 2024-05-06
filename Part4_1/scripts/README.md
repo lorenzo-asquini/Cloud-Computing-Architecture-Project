@@ -26,7 +26,7 @@ Consider the file `setup_agent_measure.sh`.
 
 Run the script with `./setup_agent_measure.sh`. If there is a permission denied error, run `chmod 744 setup_agent_measure.sh` in order to set the permission to execute the script.
 
-This script will upload and run the scripts `remote_setup.sh` and `remote_setup_memcache.sh` (which must be on the same folder) on the servers. It will ask multiple times for the SSH password if you have set a password for the key.
+This script will upload and run the scripts `remote_setup.sh` and `remote_setup_memcache.sh` (which must be on the same folder) on the servers. It will ask multiple times for the SSH password if you have set a password for the key. It will also upload `get_cpu.py` to the node where memcache resides.
 
 ## Run the tests on all interferences for multiple times
 
