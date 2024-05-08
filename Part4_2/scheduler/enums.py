@@ -1,6 +1,6 @@
 import enum
 
-class JobType(enum.Enum):
+class JobContainer(enum.Enum):
 
     BLACKSCHOLES="anakli/cca:parsec_blackscholes"
     CANNEAL="anakli/cca:parsec_canneal"
