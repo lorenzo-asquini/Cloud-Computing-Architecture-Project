@@ -30,8 +30,6 @@ This script will upload and run the scripts `remote_setup.sh` and `remote_setup_
 
 ## Run the tests on all interferences for multiple times
 
-Consider the file `run_all.sh`.
+Consider the file `run.sh`.
 
-Run the script with `./run_all.sh`. If there is a permission denied error, run `chmod 744 run_all.sh` in order to set the permission to execute the script.
-
-It will run the tests for all the configurations given the number of threads and the number of cores. For each configuration, after restarting the memcache service, it will execute the tests for 3 times.
+Run the script with `./run.sh`. If there is a permission denied error, run `chmod 744 run_all.sh` in order to set the permission to execute the script. You will need to run the script multiple times, one for each run you want to execute.

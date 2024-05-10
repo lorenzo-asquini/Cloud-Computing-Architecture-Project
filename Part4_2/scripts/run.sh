@@ -51,6 +51,12 @@ screen -d -m -S "AGENT_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PU
 sleep 15
 
 logEcho "#############################################"
+logEcho "# ASSIGNING 2 CORES TO MEMCACHE"
+logEcho "#############################################"
+MEMCACHED_PID=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "cat /var/run/memcached/memcached.pid" | tr -d '\r')
+gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo taskset -a -cp "0-1" $MEMCACHED_PID"
+
+logEcho "#############################################"
 logEcho "# RUNNING QUERIES"
 logEcho "#############################################"
 gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- "./memcache-perf-dynamic/mcperf -s $MEMCACHE_IPADDR --loadonly"
@@ -59,13 +65,13 @@ AGENT_INTERNAL_IP_ADDR=`kubectl get nodes -o wide | grep client-agent | awk -v O
 
 screen -d -m -S "LOAD_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- \
 "./memcache-perf-dynamic/mcperf -s $MEMCACHE_IPADDR -a $AGENT_INTERNAL_IP_ADDR \
---noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 10 \
---qps_interval 2 --qps_min 5000 --qps_max 100000 > ./mcperf_${CURRENTEPOCTIME}.txt" &
+--noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 1800 \
+--qps_interval 10 --qps_min 5000 --qps_max 100000 > ./mcperf_${CURRENTEPOCTIME}.txt" &
 
 logEcho "#############################################"
 logEcho "# STARTING SCHEDULER"
 logEcho "#############################################"
-gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "poetry run python3 ./resource_scheduler/scheduler/main.py"
+gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo python3 ./scheduler/main.py"
 
 logEcho "#############################################"
 logEcho "# KILL DETACHED MCPERF"
@@ -89,5 +95,4 @@ gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_N
 logEcho "#############################################"
 logEcho "# GETTING SCHEDULER LOG FROM SERVER"
 logEcho "#############################################"
-LOG_FILENAME=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- 'ls ./resource_scheduler/scheduler/log* | xargs -n 1 basename')
-gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/resource_scheduler/scheduler/${LOG_FILENAME}" ../part4_2_raw_outputs/${LOG_FILENAME} --zone europe-west3-a
+gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/resource_scheduler/scheduler/log*" ../part4_2_raw_outputs/ --zone europe-west3-a
