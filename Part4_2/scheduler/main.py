@@ -3,8 +3,8 @@ import docker.models
 import docker.models.containers
 import sys
 import docker
-from scheduler.policies import CPUBasedPolicy
-from scheduler.enums import JobContainer, ContainerState
+from policies import CPUBasedPolicy
+from enums import JobContainer, ContainerState
 from time import sleep
 
 import scheduler_logger as sl
@@ -49,15 +49,19 @@ def main():
         
         ### Check if jobs have exited. If first time, log it
         container_states = getContainerStates()
+        print(container_states)
 
         can_exit = True
         for job_type in sl.Job:
-            if container_states[job_type] == ContainerState.EXITED:
-                if not policy.JOB_INFOS["LOGGED_EXIT"]:
-                    sl.job_end(job_type)
-                    policy.JOB_INFOS["LOGGED_EXIT"] = True
+            if job_type.name == "SCHEDULER" or job_type.name == "MEMCACHED":
+                continue
 
-                    logging.info(f"Job {job_type} just exited")
+            if container_states[job_type.name] == ContainerState.EXITED:
+                if not policy.JOB_INFOS[job_type.name]["Logged_Exit"]:
+                    official_logger.job_end(job_type)
+                    policy.JOB_INFOS[job_type.name]["Logged_Exit"] = True
+
+                    logging.info(f"Job {job_type.name} just exited")
 
             else:
                 can_exit = False  # At least one job is still running
@@ -76,34 +80,36 @@ def main():
 
         ### Start new containers if dependencies are satisfied
         for job_type, job_container in zip(sl.Job, JobContainer):
+            if job_type.name == "SCHEDULER" or job_type.name == "MEMCACHED":
+                continue
 
             ##### Start container if all dependencies have finished
-            if policy.canRunJob(job_type, getContainerStates()):
+            if policy.canRunJob(job_type.name, getContainerStates()):
 
-                official_logger.job_start(job_type, policy.JOB_INFOS["CORES"], policy.JOB_INFOS["THREADS"])
+                official_logger.job_start(job_type, policy.JOB_INFOS[job_type.name]["Cores"], policy.JOB_INFOS[job_type.name]["Threads"])
 
-                container_cores = ",".join(policy.JOB_INFOS["CORES"])  # From list of cores to comma separated cores
+                container_cores = ",".join(policy.JOB_INFOS[job_type.name]["Cores"])  # From list of cores to comma separated cores
                 CONTAINERS[job_type.name] = startJob(job_container, 
-                                                     policy.getRunArguments(job_container)+str(policy.JOB_INFOS[job_type]), 
+                                                     policy.getRunArguments(job_container)+str(policy.JOB_INFOS[job_type.name]), 
                                                      container_cores).id
                 
-                logging.info(f"Starting job {job_type}")
+                logging.info(f"Starting job {job_type.name}")
             
 
             ##### Check if the coexistent job should be stopped or resumed
-            do_pause_job = policy.pauseJob(job_type)
+            do_pause_job = policy.pauseJob(job_type.name)
 
-            if(do_pause_job and getContainerStates()[job_type] == ContainerState.RUNNING):
+            if(do_pause_job and getContainerStates()[job_type.name] == ContainerState.RUNNING):
                 official_logger.job_pause(job_type)
-                getContainerById(CONTAINERS[job_type]).pause()
-                logging.info(f"Pausing job {job_type}")
+                getContainerById(CONTAINERS[job_type.name]).pause()
+                logging.info(f"Pausing job {job_type.name}")
 
-            if(not do_pause_job and getContainerStates()[job_type] == ContainerState.PAUSED):
+            if(not do_pause_job and getContainerStates()[job_type.name] == ContainerState.PAUSED):
                 official_logger.job_unpause(job_type)
-                getContainerById(CONTAINERS[job_type]).unpause()
-                logging.info(f"Unpausing job {job_type}")
+                getContainerById(CONTAINERS[job_type.name]).unpause()
+                logging.info(f"Unpausing job {job_type.name}")
 
-        sleep(0.5)  # Act quite fast because load can change rapidly
+        sleep(5)  # Act quite fast because load can change rapidly
 
 
 if __name__ == "__main__":

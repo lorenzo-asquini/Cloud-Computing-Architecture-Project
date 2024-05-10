@@ -2,6 +2,9 @@ import enum
 
 class JobContainer(enum.Enum):
 
+    SCHEDULER=""  # Placeholder to avoid problems
+    MEMCACHED=""  # Placeholder to avoid problems
+
     BLACKSCHOLES="anakli/cca:parsec_blackscholes"
     CANNEAL="anakli/cca:parsec_canneal"
     DEDUP="anakli/cca:parsec_dedup"
@@ -26,7 +29,3 @@ class ContainerState(enum.Enum):
         if key:
             return cls[key]
         return cls.UNKNOWN
-    
-    @classmethod
-    def isInProgress(cls, status):
-        return status in [ContainerState.CREATED, ContainerState.RUNNING]
