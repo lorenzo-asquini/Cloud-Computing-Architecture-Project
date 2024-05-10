@@ -18,7 +18,7 @@ echo "$memcache_configuration" | sudo tee /etc/memcached.conf
 sudo systemctl restart memcached
 
 MEMCACHED_PID=$(cat /var/run/memcached/memcached.pid | tr -d '\r')
-sudo taskset -a -cp 0 $MEMCACHED_PID
+sudo taskset -a -cp 0,1 $MEMCACHED_PID  # Start with 2 cores
 
 # Install docker
 sudo NEEDRESTART_MODE=a apt-get install ca-certificates curl -y

@@ -62,23 +62,16 @@ screen -d -m -S "LOAD_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB
 --noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 10 \
 --qps_interval 2 --qps_min 5000 --qps_max 100000 > ./mcperf_${CURRENTEPOCTIME}.txt" &
 
-kubectl get pods -o json > ../part3_raw_outputs/pod_results_${CURRENTEPOCTIME}.json
-
-sleep 5
-
 logEcho "#############################################"
-logEcho "# KILLING ALL JOBS"
+logEcho "# STARTING SCHEDULER"
 logEcho "#############################################"
-kubectl delete jobs --all
+gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "poetry run python3 ./resource_scheduler/scheduler/main.py"
 
 logEcho "#############################################"
 logEcho "# KILL DETACHED MCPERF"
 logEcho "#############################################"
-DETACHED_PROC=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_A_NAME" --zone europe-west3-a  -- 'ps -aux | grep mcperf | head -1' | awk '{print $2}')
-gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_A_NAME" --zone europe-west3-a  -- "sudo kill $DETACHED_PROC"
-
-DETACHED_PROC=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_B_NAME" --zone europe-west3-a  -- 'ps -aux | grep mcperf | head -1' | awk '{print $2}')
-gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_B_NAME" --zone europe-west3-a  -- "sudo kill $DETACHED_PROC"
+DETACHED_PROC=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_NAME" --zone europe-west3-a  -- 'ps -aux | grep mcperf | head -1' | awk '{print $2}')
+gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_AGENT_NAME" --zone europe-west3-a  -- "sudo kill $DETACHED_PROC"
 
 DETACHED_PROC=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- 'ps -aux | grep mcperf | head -1' | awk '{print $2}')
 gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- "sudo kill $DETACHED_PROC"
@@ -92,3 +85,9 @@ logEcho "#############################################"
 logEcho "# GETTING MCPERF DATA FROM SERVER"
 logEcho "#############################################"
 gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME:/home/ubuntu/mcperf_${CURRENTEPOCTIME}.txt" ../part4_2_raw_outputs/mcperf_${CURRENTEPOCTIME}.txt --zone europe-west3-a
+
+logEcho "#############################################"
+logEcho "# GETTING SCHEDULER LOG FROM SERVER"
+logEcho "#############################################"
+LOG_FILENAME=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- 'ls ./resource_scheduler/scheduler/log* | xargs -n 1 basename')
+gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/resource_scheduler/scheduler/${LOG_FILENAME}" ../part4_2_raw_outputs/${LOG_FILENAME} --zone europe-west3-a

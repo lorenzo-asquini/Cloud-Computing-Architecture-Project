@@ -26,17 +26,17 @@ class Policy:
         raise NotImplementedError()
 
 
-class CPUBased(Policy):
+class CPUBasedPolicy(Policy):
 
     # Initial idea:
     # Use the two cores that are never used by memcache to run in order: Ferret, Freqmine, Radix, Vips
     # Once they are done, start in parallel on those two cores: Canneal, Dedup
-    # Keep Blackscholes running on the second core that may be used by Memcache. If the CPU usage is very high, stop it.
+    # Keep Blackscholes running on the second core that may be used by Memcache. If the CPU usage is very high, pause it.
     # TODO: Possibly, if Blackscholes finishes early, use the core for someone else + Parallelize something else
 
     # Threads are set dynamically
     RUN_ARGUMENTS = {
-        JobContainer.BLACKSCHOLES: "./run -a run -S parsec -p blackscholes -i native -n 1",
+        JobContainer.BLACKSCHOLES: "./run -a run -S parsec -p blackscholes -i native -n ",
 
         JobContainer.FERRET: "./run -a run -S parsec -p ferret -i native -n ",
         JobContainer.FREQMINE: "./run -a run -S parsec -p freqmine -i native -n ",
@@ -52,45 +52,52 @@ class CPUBased(Policy):
             "CORES": ["1"],
             "DEPENDENCIES": [],
             "THREADS": 1,
-            "COEXIST": True
+            "COEXIST": True,
+            "LOGGED_EXIT": False
         },
 
         Job.FERRET: {
             "CORES": ["2", "3"],
             "DEPENDENCIES": [],
-            "THREADS": 1,
-            "COEXIST": False
+            "THREADS": 2,
+            "COEXIST": False,
+            "LOGGED_EXIT": False
         },
         Job.FREQMINE: {
             "CORES": ["2", "3"],
             "DEPENDENCIES": [Job.FERRET],
             "THREADS": 2,
-            "COEXIST": False
+            "COEXIST": False,
+            "LOGGED_EXIT": False
         },
         Job.RADIX: {
             "CORES": ["2", "3"],
             "DEPENDENCIES": [Job.FERRET, Job.FREQMINE],
             "THREADS": 2,
-            "COEXIST": False
+            "COEXIST": False,
+            "LOGGED_EXIT": False
         },
         Job.VIPS: {
             "CORES": ["2", "3"],
             "DEPENDENCIES": [Job.FERRET, Job.FREQMINE, Job.RADIX],
             "THREADS": 2,
-            "COEXIST": False
+            "COEXIST": False,
+            "LOGGED_EXIT": False
         },
 
         Job.CANNEAL: {
             "CORES": ["2", "3"],
             "DEPENDENCIES": [Job.FERRET, Job.FREQMINE, Job.RADIX, Job.VIPS],
             "THREADS": 2,
-            "COEXIST": False
+            "COEXIST": False,
+            "LOGGED_EXIT": False
         },
         Job.DEDUP: {
             "CORES": ["2", "3"],
             "DEPENDENCIES": [Job.FERRET, Job.FREQMINE, Job.RADIX, Job.VIPS],
             "THREADS": 2,
-            "COEXIST": False
+            "COEXIST": False,
+            "LOGGED_EXIT": False
         },   
     }
 
@@ -124,19 +131,23 @@ class CPUBased(Policy):
         
         return -1  # No change
     
-    def canRunJob(self, job_type: Job, container_states: dict[str, ContainerState]):
+    def canRunJob(self, job_type: Job, all_container_states: dict[str, ContainerState]):
         """
         If the job already started, it cannot be started again.
         If all the dependencies exited, start the job.
         Return True if the job started, False otherwise.
         """
-        if any(ContainerState.isInProgress(state) for state in container_states.values()):  # TODO: Why this convoluted method?
+
+        # If the container state is not None or if it's in progress, cannot start the job
+        if not all_container_states[job_type] or ContainerState.isInProgress(all_container_states[job_type]):
             return False
         
+        # Check for all dependencies
         can_start = True
         for dependency in self.JOB_INFOS[job_type]["DEPENDENCIES"]:
-            if(container_states[dependency] != ContainerState.EXITED):
+            if(all_container_states[dependency] != ContainerState.EXITED):
                 can_start = False
+                break
             
         return can_start
     
@@ -155,24 +166,3 @@ class CPUBased(Policy):
                 return False
             
         return False
-
-class OneAtATime(Policy):
-
-    # Policy 0
-    
-    RUN_ARGUMENTS = {
-        JobContainer.BLACKSCHOLES: "./run -a run -S parsec -p blackscholes -i native -n 2"
-    }
-
-    def canRunJob(job_type: JobContainer, container_states: dict[str, ContainerState]):
-
-        if any(ContainerState.isInProgress(state) for state in container_states.values()):
-            return False
-        
-        return True
-    
-
-ARG_TO_POLICY = {
-    0: OneAtATime,
-    1: CPUBased
-}
