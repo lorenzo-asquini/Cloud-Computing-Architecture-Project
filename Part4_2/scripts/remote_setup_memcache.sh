@@ -3,22 +3,10 @@
 sudo NEEDRESTART_MODE=a apt-get update
 sudo NEEDRESTART_MODE=a apt-get install -y memcached libmemcached-tools
 
-# Necessary to expose the service now. The ip is given as argument to the script
-memcache_configuration="
--d
-logfile /var/log/memcached.log
--m 1024
--p 11211
--u memcache
--l $1
--P /var/run/memcached/memcached.pid
--t 1
-"
-echo "$memcache_configuration" | sudo tee /etc/memcached.conf  
-sudo systemctl restart memcached
-
-MEMCACHED_PID=$(cat /var/run/memcached/memcached.pid | tr -d '\r')
-sudo taskset -a -cp 0,1 $MEMCACHED_PID  # Start with 2 cores
+# Install python dependencies
+sudo NEEDRESTART_MODE=a apt-get install -y python3-pip
+sudo pip3 install psutil
+sudo pip3 install docker
 
 # Install docker
 sudo NEEDRESTART_MODE=a apt-get install ca-certificates curl -y
@@ -33,12 +21,26 @@ sudo NEEDRESTART_MODE=a apt-get update -y
 sudo NEEDRESTART_MODE=a apt-get install docker-ce docker-ce-cli docker-buildx-plugin docker-compose-plugin -y
 sudo usermod -a -G docker ubuntu
 
-# Install python
-sudo NEEDRESTART_MODE=a apt-get install python3.10 -y
+# Necessary to expose the service now. The ip is given as argument to the script
+# Run with 2 threads
+memcache_configuration="
+-d
+logfile /var/log/memcached.log
+-m 1024
+-p 11211
+-u memcache
+-l $1
+-P /var/run/memcached/memcached.pid
+-t 2
+"
+echo "$memcache_configuration" | sudo tee /etc/memcached.conf  
+sudo systemctl restart memcached
 
-# Install poetry
-sudo curl -sSL https://install.python-poetry.org | python3 - --version 1.8.2
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-
-# Reload bashrc
-source ~/.bashrc
+# Pull all required docker images
+docker pull anakli/cca:parsec_blackscholes
+docker pull anakli/cca:parsec_canneal
+docker pull anakli/cca:parsec_dedup
+docker pull anakli/cca:parsec_ferret
+docker pull anakli/cca:parsec_freqmine
+docker pull anakli/cca:splash2x_radix
+docker pull anakli/cca:parsec_vips

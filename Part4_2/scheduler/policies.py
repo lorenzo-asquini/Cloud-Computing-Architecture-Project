@@ -1,4 +1,4 @@
-from scheduler.enums import ContainerState, JobContainer
+from enums import ContainerState, JobContainer
 from scheduler_logger import Job
 
 import os
@@ -14,7 +14,7 @@ class Policy:
     def getRunArguments(cls, job_type: JobContainer):
         if job_type not in cls.RUN_ARGUMENTS:
             raise RuntimeError(f"Could not find runtime arguments for job: {job_type}")
-        return cls.RUN_ARGUMENTS[job_type]
+        return cls.RUN_ARGUMENTS[job_type] + str(cls.JOB_INFOS[job_type.name]["Threads"])
 
     def canRunJob(self, job_type: JobContainer, container_states: dict[str, ContainerState]):
         raise NotImplementedError()
@@ -36,6 +36,9 @@ class CPUBasedPolicy(Policy):
 
     # Threads are set dynamically
     RUN_ARGUMENTS = {
+        JobContainer.SCHEDULER: "",  #Only to avoid problems when referring to the logger Jobs
+        JobContainer.MEMCACHED: "",  #Only to avoid problems when referring to the logger Jobs
+
         JobContainer.BLACKSCHOLES: "./run -a run -S parsec -p blackscholes -i native -n ",
 
         JobContainer.FERRET: "./run -a run -S parsec -p ferret -i native -n ",
@@ -48,56 +51,56 @@ class CPUBasedPolicy(Policy):
     }
 
     JOB_INFOS = {
-        Job.BLACKSCHOLES: {
-            "CORES": ["1"],
-            "DEPENDENCIES": [],
-            "THREADS": 1,
-            "COEXIST": True,
-            "LOGGED_EXIT": False
+        "BLACKSCHOLES": {
+            "Cores": ["1"],
+            "Dependencies": [],
+            "Threads": 1,
+            "Coexist": True,
+            "Logged_Exit": False
         },
 
-        Job.FERRET: {
-            "CORES": ["2", "3"],
-            "DEPENDENCIES": [],
-            "THREADS": 2,
-            "COEXIST": False,
-            "LOGGED_EXIT": False
+        "FERRET": {
+            "Cores": ["2", "3"],
+            "Dependencies": [],
+            "Threads": 2,
+            "Coexist": False,
+            "Logged_Exit": False
         },
-        Job.FREQMINE: {
-            "CORES": ["2", "3"],
-            "DEPENDENCIES": [Job.FERRET],
-            "THREADS": 2,
-            "COEXIST": False,
-            "LOGGED_EXIT": False
+        "FREQMINE": {
+            "Cores": ["2", "3"],
+            "Dependencies": ["FERRET"],
+            "Threads": 2,
+            "Coexist": False,
+            "Logged_Exit": False
         },
-        Job.RADIX: {
-            "CORES": ["2", "3"],
-            "DEPENDENCIES": [Job.FERRET, Job.FREQMINE],
-            "THREADS": 2,
-            "COEXIST": False,
-            "LOGGED_EXIT": False
+        "RADIX": {
+            "Cores": ["2", "3"],
+            "Dependencies": ["FERRET", "FREQMINE"],
+            "Threads": 2,
+            "Coexist": False,
+            "Logged_Exit": False
         },
-        Job.VIPS: {
-            "CORES": ["2", "3"],
-            "DEPENDENCIES": [Job.FERRET, Job.FREQMINE, Job.RADIX],
-            "THREADS": 2,
-            "COEXIST": False,
-            "LOGGED_EXIT": False
+        "VIPS": {
+            "Cores": ["2", "3"],
+            "Dependencies": ["FERRET", "FREQMINE", "RADIX"],
+            "Threads": 2,
+            "Coexist": False,
+            "Logged_Exit": False
         },
 
-        Job.CANNEAL: {
-            "CORES": ["2", "3"],
-            "DEPENDENCIES": [Job.FERRET, Job.FREQMINE, Job.RADIX, Job.VIPS],
-            "THREADS": 2,
-            "COEXIST": False,
-            "LOGGED_EXIT": False
+        "CANNEAL": {
+            "Cores": ["2", "3"],
+            "Dependencies": ["FERRET", "FREQMINE", "RADIX", "VIPS"],
+            "Threads": 2,
+            "Coexist": False,
+            "Logged_Exit": False
         },
-        Job.DEDUP: {
-            "CORES": ["2", "3"],
-            "DEPENDENCIES": [Job.FERRET, Job.FREQMINE, Job.RADIX, Job.VIPS],
-            "THREADS": 2,
-            "COEXIST": False,
-            "LOGGED_EXIT": False
+        "DEDUP": {
+            "Cores": ["2", "3"],
+            "Dependencies": ["FERRET", "FREQMINE", "RADIX", "VIPS"],
+            "Threads": 2,
+            "Coexist": False,
+            "Logged_Exit": False
         },   
     }
 
@@ -121,43 +124,45 @@ class CPUBasedPolicy(Policy):
 
         # If using 2 cores and the cpu is below 40%, switch to 1 core
         if(cpu_usage < 40 and self.current_memcache_cores == 2):
-            self.memcache_process.cpu_affinity([0])  # TODO: Does this work as taskset?
+            self.memcache_process.cpu_affinity([0])  # Requires execution with sudo
+            self.current_memcache_cores = 1
             return 1
         
         # If using 1 core and the cpu is above 30%, switch to 2 cores
         if(cpu_usage > 30 and self.current_memcache_cores == 1):
             self.memcache_process.cpu_affinity([0, 1])
+            self.current_memcache_cores = 2
             return 2
         
         return -1  # No change
     
-    def canRunJob(self, job_type: Job, all_container_states: dict[str, ContainerState]):
+    def canRunJob(self, job_type: str, all_container_states: dict[str, ContainerState]):
         """
         If the job already started, it cannot be started again.
-        If all the dependencies exited, start the job.
+        If all the Dependencies exited, start the job.
         Return True if the job started, False otherwise.
         """
 
-        # If the container state is not None or if it's in progress, cannot start the job
-        if not all_container_states[job_type] or ContainerState.isInProgress(all_container_states[job_type]):
+        # If the container state is not unknow, then it was started at some point
+        if all_container_states[job_type] != ContainerState.UNKNOWN:
             return False
         
-        # Check for all dependencies
+        # Check for all Dependencies
         can_start = True
-        for dependency in self.JOB_INFOS[job_type]["DEPENDENCIES"]:
+        for dependency in self.JOB_INFOS[job_type]["Dependencies"]:
             if(all_container_states[dependency] != ContainerState.EXITED):
                 can_start = False
                 break
-            
+
         return can_start
     
-    def pauseJob(self, job_type: Job):  # TODO: see if it makes sense. See if 150 is a good threshold
+    def pauseJob(self, job_type: str):  # TODO: see if it makes sense. See if 150 is a good threshold
         """
-        Handle the potential coexistence of a job in the core 1 with memcache.
+        Handle the potential Coexistence of a job in the core 1 with memcache.
         If memcache is heavily utilized (cpu > 150%), it's better to stop the job temporarily.
-        Return False if there is no coexistence or if the job shouldn't be stopped (resume it if necessary), True if the state should be stopped
+        Return False if there is no Coexistence or if the job shouldn't be stopped (resume it if necessary), True if the state should be stopped
         """
-        if(self.JOB_INFOS[job_type]["COEXIST"]):
+        if(self.JOB_INFOS[job_type]["Coexist"]):
             cpu_usage = self.memcache_process.cpu_percent(interval=0.4)
 
             if(cpu_usage > 150):

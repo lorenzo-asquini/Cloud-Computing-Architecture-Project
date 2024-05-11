@@ -40,12 +40,5 @@ echo "# DEPLOYING ON $MEMCACHE_SERVER_NAME"
 echo "#############################################"
 gcloud compute scp --ssh-key-file "$CCA_PROJECT_PUB_KEY" remote_setup_memcache.sh "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/remote_setup_memcache.sh" --zone europe-west3-a
 gcloud compute ssh --ssh-key-file "$CCA_PROJECT_PUB_KEY" "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "cd /home/ubuntu && chmod 744 remote_setup_memcache.sh && ./remote_setup_memcache.sh $MEMCACHE_IPADDR"
-gcloud compute ssh --ssh-key-file "$CCA_PROJECT_PUB_KEY" "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "mkdir /home/ubuntu/resource_scheduler"
-gcloud compute scp --ssh-key-file "$CCA_PROJECT_PUB_KEY" ../pyproject.toml "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/resource_scheduler/pyproject.toml" --zone europe-west3-a
-gcloud compute scp --ssh-key-file "$CCA_PROJECT_PUB_KEY" ../poetry.lock "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/resource_scheduler/poetry.lock" --zone europe-west3-a
-gcloud compute scp --ssh-key-file "$CCA_PROJECT_PUB_KEY" --recurse ../scheduler "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/resource_scheduler/scheduler" --zone europe-west3-a
 
-echo "#############################################"
-echo "# INSTALLING PYTHON PROJECT ON $MEMCACHE_SERVER_NAME"
-echo "#############################################"
-gcloud compute ssh --ssh-key-file "$CCA_PROJECT_PUB_KEY" "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "cd /home/ubuntu/resource_scheduler && poetry install && chmod 744 scheduler/main.py"
+gcloud compute scp --ssh-key-file "$CCA_PROJECT_PUB_KEY" --recurse ../scheduler "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu" --zone europe-west3-a
