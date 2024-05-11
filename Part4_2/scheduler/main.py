@@ -11,7 +11,7 @@ import scheduler_logger as sl
 
 # The official logger will create its own file, so no need to worry about polluting it
 logging_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=logging_format)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=logging_format)
 
 logging.info("Starting everything")
 
@@ -43,7 +43,7 @@ def main():
     policy = CPUBasedPolicy()
 
     official_logger = sl.SchedulerLogger()
-    official_logger.job_start(sl.Job.MEMCACHED, ["0", "1"], 2)  # TODO: remember to start memcached with 2 cores at the beginning. In case lower them later
+    official_logger.job_start(sl.Job.MEMCACHED, ["0", "1"], 2)
     
     while True:
         
@@ -108,7 +108,7 @@ def main():
                 getContainerById(CONTAINERS[job_type.name]).unpause()
                 logging.info(f"Unpausing job {job_type.name}")
 
-        sleep(5)  # Act quite fast because load can change rapidly
+        sleep(1)  # Act quite fast because load can change rapidly
 
 
 if __name__ == "__main__":
