@@ -69,9 +69,23 @@ screen -d -m -S "LOAD_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB
 --qps_interval 10 --qps_min 5000 --qps_max 100000 > ./mcperf_${CURRENTEPOCTIME}.txt" &
 
 logEcho "#############################################"
+logEcho "# REMOVING ALL OLD CONTAINERS (IF ANY)"
+logEcho "#############################################"
+# TODO
+for name in "BLACKSCHOLES" "FERRET" "FREQMINE" "RADIX" "VIPS" "CANNEAL" "DEDUP"; do
+    gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo docker remove $name"
+done
+
+logEcho "#############################################"
 logEcho "# STARTING SCHEDULER"
 logEcho "#############################################"
-gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo python3 ./scheduler/main.py"
+# gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo python3 ./scheduler/main.py"
+
+logEcho "#############################################"
+logEcho "# WAIT FOR MCPERF"
+logEcho "#############################################"
+
+# TODO
 
 logEcho "#############################################"
 logEcho "# KILL DETACHED MCPERF"
