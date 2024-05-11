@@ -35,7 +35,7 @@ def getContainerStates():  # Return a dict that assigns to each Job type it's st
 
 
 def startJob(job_container: JobContainer, run_arguments: str, cores: str):
-    return docker_client.containers.run(job_container.value, run_arguments, cpuset_cpus=cores, detach=True)
+    return docker_client.containers.run(job_container.value, run_arguments, cpuset_cpus=cores, detach=True, name=job_container.name)
 
 
 def main():
@@ -79,18 +79,17 @@ def main():
             logging.info("Updating memcache cores to 2")
 
         ### Start new containers if dependencies are satisfied
-        for job_type, job_container in zip(sl.Job, JobContainer):
+        for job_type in sl.Job:
             if job_type.name == "SCHEDULER" or job_type.name == "MEMCACHED":
                 continue
 
             ##### Start container if all dependencies have finished
             if policy.canRunJob(job_type.name, getContainerStates()):
-
+            
                 official_logger.job_start(job_type, policy.JOB_INFOS[job_type.name]["Cores"], policy.JOB_INFOS[job_type.name]["Threads"])
 
                 container_cores = ",".join(policy.JOB_INFOS[job_type.name]["Cores"])  # From list of cores to comma separated cores
-                CONTAINERS[job_type.name] = startJob(job_container, 
-                                                     policy.getRunArguments(job_container)+str(policy.JOB_INFOS[job_type.name]), 
+                CONTAINERS[job_type.name] = startJob(JobContainer[job_type.name], policy.getRunArguments(JobContainer[job_type.name]), 
                                                      container_cores).id
                 
                 logging.info(f"Starting job {job_type.name}")
