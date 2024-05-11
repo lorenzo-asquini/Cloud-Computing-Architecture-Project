@@ -73,13 +73,6 @@ class CPUBasedPolicy(Policy):
             "Coexist": False,
             "Logged_Exit": False
         },
-        "RADIX": {
-            "Cores": ["2", "3"],
-            "Dependencies": ["FERRET", "FREQMINE"],
-            "Threads": 2,
-            "Coexist": False,
-            "Logged_Exit": False
-        },
         "VIPS": {
             "Cores": ["2", "3"],
             "Dependencies": ["FERRET", "FREQMINE", "RADIX"],
@@ -89,15 +82,22 @@ class CPUBasedPolicy(Policy):
         },
 
         "CANNEAL": {
-            "Cores": ["2", "3"],
-            "Dependencies": ["FERRET", "FREQMINE", "RADIX", "VIPS"],
-            "Threads": 2,
+            "Cores": ["1"],
+            "Dependencies": ["BLACKSCHOLES"],
+            "Threads": 1,
             "Coexist": False,
             "Logged_Exit": False
         },
         "DEDUP": {
+            "Cores": ["1"],
+            "Dependencies": ["BLACKSCHOLES", "CANNEAL"],
+            "Threads": 1,
+            "Coexist": False,
+            "Logged_Exit": False
+        },
+        "RADIX": {
             "Cores": ["2", "3"],
-            "Dependencies": ["FERRET", "FREQMINE", "RADIX", "VIPS"],
+            "Dependencies": ["BLACKSCHOLES", "CANNEAL", "DEDUP"],
             "Threads": 2,
             "Coexist": False,
             "Logged_Exit": False

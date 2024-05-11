@@ -49,7 +49,6 @@ def main():
         
         ### Check if jobs have exited. If first time, log it
         container_states = getContainerStates()
-        print(container_states)
 
         can_exit = True
         for job_type in sl.Job:
@@ -109,6 +108,8 @@ def main():
                 logging.info(f"Unpausing job {job_type.name}")
 
         sleep(1)  # Act quite fast because load can change rapidly
+
+    official_logger.end()
 
 
 if __name__ == "__main__":
