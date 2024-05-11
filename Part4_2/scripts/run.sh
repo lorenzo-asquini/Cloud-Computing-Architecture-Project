@@ -95,4 +95,4 @@ gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_N
 logEcho "#############################################"
 logEcho "# GETTING SCHEDULER LOG FROM SERVER"
 logEcho "#############################################"
-gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/resource_scheduler/scheduler/log*" ../part4_2_raw_outputs/ --zone europe-west3-a
+gcloud compute scp --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME:/home/ubuntu/log*" ../part4_2_raw_outputs/ --zone europe-west3-a

@@ -35,3 +35,12 @@ logfile /var/log/memcached.log
 "
 echo "$memcache_configuration" | sudo tee /etc/memcached.conf  
 sudo systemctl restart memcached
+
+# Pull all required docker images
+docker pull anakli/cca:parsec_blackscholes
+docker pull anakli/cca:parsec_canneal
+docker pull anakli/cca:parsec_dedup
+docker pull anakli/cca:parsec_ferret
+docker pull anakli/cca:parsec_freqmine
+docker pull anakli/cca:splash2x_radix
+docker pull anakli/cca:parsec_vips

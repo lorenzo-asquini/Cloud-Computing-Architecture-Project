@@ -14,7 +14,7 @@ class Policy:
     def getRunArguments(cls, job_type: JobContainer):
         if job_type not in cls.RUN_ARGUMENTS:
             raise RuntimeError(f"Could not find runtime arguments for job: {job_type}")
-        return cls.RUN_ARGUMENTS[job_type]
+        return cls.RUN_ARGUMENTS[job_type] + str(cls.JOB_INFOS[job_type.name]["Threads"])
 
     def canRunJob(self, job_type: JobContainer, container_states: dict[str, ContainerState]):
         raise NotImplementedError()
@@ -153,7 +153,7 @@ class CPUBasedPolicy(Policy):
             if(all_container_states[dependency] != ContainerState.EXITED):
                 can_start = False
                 break
-            
+
         return can_start
     
     def pauseJob(self, job_type: str):  # TODO: see if it makes sense. See if 150 is a good threshold
