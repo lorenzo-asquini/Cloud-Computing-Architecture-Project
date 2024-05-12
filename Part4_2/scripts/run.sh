@@ -1,11 +1,18 @@
 #!/bin/bash
-
-# Create folder for the outputs
-mkdir ../part4_2_raw_outputs
+MCPERF_TIMEOUT=$1
 
 logEcho() {
     echo $(date -u) "||| $1"
 }
+
+if [[ -z "$MCPERF_TIMEOUT" ]]; then
+    logEcho "Must specify MCPERF load timeout as argument in seconds (e.g. 1200 for 20 minutes)"
+    logEcho "Exiting"
+    exit
+fi 
+
+# Create folder for the outputs
+mkdir ../part4_2_raw_outputs
 
 CURRENTEPOCTIME=$(date +%s)
 logEcho "Current EPOCH is $CURRENTEPOCTIME"
@@ -65,13 +72,12 @@ AGENT_INTERNAL_IP_ADDR=`kubectl get nodes -o wide | grep client-agent | awk -v O
 
 screen -d -m -S "LOAD_MCPERF" gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- \
 "./memcache-perf-dynamic/mcperf -s $MEMCACHE_IPADDR -a $AGENT_INTERNAL_IP_ADDR \
---noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 1800 \
+--noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t $MCPERF_TIMEOUT \
 --qps_interval 10 --qps_min 5000 --qps_max 100000 > ./mcperf_${CURRENTEPOCTIME}.txt" &
 
 logEcho "#############################################"
 logEcho "# REMOVING ALL OLD CONTAINERS (IF ANY)"
 logEcho "#############################################"
-# TODO
 for name in "BLACKSCHOLES" "FERRET" "FREQMINE" "RADIX" "VIPS" "CANNEAL" "DEDUP"; do
     gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo docker remove $name"
 done
@@ -79,13 +85,22 @@ done
 logEcho "#############################################"
 logEcho "# STARTING SCHEDULER"
 logEcho "#############################################"
-# gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo python3 ./scheduler/main.py"
+gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$MEMCACHE_SERVER_NAME" --zone europe-west3-a  -- "sudo python3 ./scheduler/main.py"
 
 logEcho "#############################################"
-logEcho "# WAIT FOR MCPERF"
+logEcho "# WAIT FOR MCPERF TO END"
 logEcho "#############################################"
-
-# TODO
+while true
+do
+    PROC=$(gcloud compute ssh --ssh-key-file $CCA_PROJECT_PUB_KEY "ubuntu@$CLIENT_MEASURE_NAME" --zone europe-west3-a  -- 'ps -aux | grep mcperf' |  grep perf-dynamic)
+    if [[ -z "$PROC" ]]; then
+        logEcho "MCPERF load finished"
+        break
+    else
+        logEcho "MCPERF load not yet finished, sleeping 10 seconds"
+        sleep 10
+    fi 
+done
 
 logEcho "#############################################"
 logEcho "# KILL DETACHED MCPERF"
