@@ -21,7 +21,7 @@ echo "Using path to ssh pub key: $CCA_PROJECT_PUB_KEY"
 
 PROJECT=`gcloud config get-value project`
 
-kops create -f ../yaml_files/part4_cheap.yaml
+kops create -f ../yaml_files/part4.yaml
 
 # This may give an error. If so, run it independently
 kops create secret --name part4.k8s.local sshpublickey admin -i $CCA_PROJECT_PUB_KEY
