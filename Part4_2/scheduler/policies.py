@@ -1,4 +1,5 @@
 from enums import ContainerState, JobContainer
+from scheduler_logger import Job
 
 import os
 import psutil
@@ -6,8 +7,6 @@ import psutil
 class Policy:
     
     RUN_ARGUMENTS = {}
-
-    JOB_INFOS = {}
 
     @classmethod
     def getRunArguments(cls, job_type: JobContainer):
@@ -18,6 +17,12 @@ class Policy:
     def canRunJob(self, job_type: JobContainer, container_states: dict[str, ContainerState]):
         raise NotImplementedError()
     
+    def adjustMemcacheCores(self):
+        raise NotImplementedError()
+    
+    def updateJobQuota(self):
+        raise NotImplementedError()
+
 
 class CPUBasedPolicy(Policy):
 
@@ -36,58 +41,97 @@ class CPUBasedPolicy(Policy):
         "RADIX": {
             "Cores": ["1"],
             "Dependencies": [],
-            "Threads": 1,
-            "Logged_Exit": False
+            "Threads": 1
         },
 
         "BLACKSCHOLES": {
             "Cores": ["2", "3"],
             "Dependencies": [],
-            "Threads": 2,
-            "Logged_Exit": False
+            "Threads": 2
         },
         "FERRET": {
             "Cores": ["2", "3"],
             "Dependencies": ["BLACKSCHOLES"],
-            "Threads": 2,
-            "Logged_Exit": False
+            "Threads": 2
         },
         "FREQMINE": {
             "Cores": ["2", "3"],
             "Dependencies": ["BLACKSCHOLES", "FERRET"],
-            "Threads": 2,
-            "Logged_Exit": False
-        },
-        "VIPS": {
-            "Cores": ["2", "3"],
-            "Dependencies": ["BLACKSCHOLES", "FERRET", "FREQMINE"],
-            "Threads": 2,
-            "Logged_Exit": False
+            "Threads": 2
         },
         "CANNEAL": {
             "Cores": ["2", "3"],
-            "Dependencies": ["BLACKSCHOLES", "FERRET", "FREQMINE", "VIPS"],
-            "Threads": 2,
-            "Logged_Exit": False
+            "Dependencies": ["BLACKSCHOLES", "FERRET", "FREQMINE"],
+            "Threads": 2
         },
         "DEDUP": {
             "Cores": ["2", "3"],
-            "Dependencies": ["BLACKSCHOLES", "FERRET", "FREQMINE", "VIPS", "CANNEAL"],
-            "Threads": 2,
-            "Logged_Exit": False
+            "Dependencies": ["BLACKSCHOLES", "FERRET", "FREQMINE", "CANNEAL"],
+            "Threads": 2
+        },
+        "VIPS": {
+            "Cores": ["2", "3"],
+            "Dependencies": ["BLACKSCHOLES", "FERRET", "FREQMINE", "CANNEAL", "DEDUP"],
+            "Threads": 2
         },
     }
+
+    base_job_cpu_period = 50000  # CPU period of a job. Used to change the quota of a job
 
     def __init__(self):
         memcache_pid = int(os.popen("cat /var/run/memcached/memcached.pid").read().strip())
         self.memcache_process = psutil.Process(memcache_pid)
+
+        for job_type in self.JOB_INFOS:
+            self.JOB_INFOS[job_type]["Logged_Exit"] = False
+
+            # Start the jobs slowly to not stress too much memcache
+            self.JOB_INFOS[job_type]["Maximum_Quota"] = int(self.base_job_cpu_period * len(self.JOB_INFOS[job_type]["Cores"]))
+            self.JOB_INFOS[job_type]["Starting_Quota"] = int(self.JOB_INFOS[job_type]["Maximum_Quota"] / 2)
+            self.JOB_INFOS[job_type]["Delta_Quota"] = int((self.JOB_INFOS[job_type]["Maximum_Quota"] - self.JOB_INFOS[job_type]["Starting_Quota"]) / 20)
+            self.JOB_INFOS[job_type]["Current_Quota"] = self.JOB_INFOS[job_type]["Starting_Quota"]
+
+    ### Handle memcache cores
+    current_memcache_cores = 2 # The starting value is always 2
+    change_memcache_cores_th = 20
+
+    def setMemcacheTwoCores(self):
+        self.memcache_process.cpu_affinity([0, 1])
+    def setMemcacheOneCore(self):
+        self.memcache_process.cpu_affinity([0])
+
+    def adjustMemcacheCores(self):
+        """
+        Adjust the number of cores assigned to memcache.
+
+        If the number of cores is 1 and the cpu utilization is above threshold, switch to two cores.
+        If the number of cores is 2 and the cpu utilization is below threshold, switch to one core.
+
+        Return the new number of cores if there was a change, -1 otherwise.
+        """
+
+        cpu_usage = self.memcache_process.cpu_percent(interval=0.2)
+
+        # If using 2 cores and the cpu is below threshold, switch to 1 core
+        if(cpu_usage < self.change_memcache_cores_th and self.current_memcache_cores == 2):
+            self.memcache_process.cpu_affinity([0])  # Requires execution with sudo
+            self.current_memcache_cores = 1
+            return 1
+        
+        # If using 1 core and the cpu is above threshold, switch to 2 cores
+        if(cpu_usage > self.change_memcache_cores_th and self.current_memcache_cores == 1):
+            self.memcache_process.cpu_affinity([0, 1])
+            self.current_memcache_cores = 2
+            return 2
+        
+        return -1  # No change
     
-    
+    ### Decide if it's possible to run a job
     def canRunJob(self, job_type: str, all_container_states: dict[str, ContainerState]):
         """
         If the job already started, it cannot be started again.
 
-        If all the dependencies exited, start the job.
+        If all the dependencies exited, and memcache is not under heavy load, start the job.
 
         Return True if the job was started, False otherwise.
         """
@@ -96,48 +140,57 @@ class CPUBasedPolicy(Policy):
         if all_container_states[job_type] != ContainerState.UNKNOWN:
             return False
         
-        # Check for all Dependencies
+        # Check for all dependencies
         can_start = True
         for dependency in self.JOB_INFOS[job_type]["Dependencies"]:
             if(all_container_states[dependency] != ContainerState.EXITED):
                 can_start = False
                 break
 
+        # Do not start a job if memcache is under heavy load
         cpu_usage = self.memcache_process.cpu_percent(interval=0.2)
-        if(cpu_usage > 35 and self.JOB_INFOS[job_type]["Cores"] == ["1"]):  # Do not start a coexisting job if memcache is under load
+        if(cpu_usage > 75):  
             can_start = False 
 
         return can_start
     
-    
-    base_job_cpu_period = 50000  # CPU period of a job. Used to lower the quota of a job in shared core with memcache
+    ### Handle job quotas
     def updateJobQuota(self, job_type: str):
         """
-        Handle the potential Coexistence of a job in the core 1 with memcache.
+        If a job is not coexisting with memcache, increase its quota if it's lower than the maximum.
+        If a job is coexisting with memcache, change its quota depending on the load on memcache.
 
-        If memcache starts using two cores, start lowering the cpu quota of the coexisting job until it's necessary to stop it.
-
-        It returns True if the quota of the job may be changed, False if the job is not coexisting with memcache.
+        Return the new quota (that may or may not be applied)
         """
 
+        # Coexisting job
         if(self.JOB_INFOS[job_type]["Cores"] == ["1"]):
             cpu_usage = self.memcache_process.cpu_percent(interval=0.2)
 
-            # Interpolate the quota (from 2000 to the cpu period) depending on the CPU usage of memcache
-            stop_coexisting_th = 35
-            min_quota = 2000
+            # Interpolate the quota depending on the CPU usage of memcache
+            stop_coexisting_th = 50
+            safe_coexist_th = 10
 
-            if(cpu_usage < stop_coexisting_th):
+            min_quota = 2000
+            max_quota = self.JOB_INFOS[job_type]["Maximum_Quota"]
+
+            if(cpu_usage < safe_coexist_th):
+                new_quota = max_quota  # Keep the quota at the maximum if memcache is not used much
+
+            if(cpu_usage >= safe_coexist_th and cpu_usage < stop_coexisting_th):
 
                 # Calculate the ratio of cpu that should be left to memcache
-                ratio = cpu_usage / stop_coexisting_th
+                ratio = (cpu_usage - safe_coexist_th) / (stop_coexisting_th - safe_coexist_th)
 
-                # Make sure it doesn't go above the cpu period
-                new_quota = min(self.base_job_cpu_period, (self.base_job_cpu_period - min_quota) * (1-ratio) + min_quota)
+                # Make sure it doesn't go above the maximum
+                new_quota = min(max_quota, (max_quota - min_quota) * (1-ratio) + min_quota)
 
             if(cpu_usage >= stop_coexisting_th):
                 new_quota = 0  # Pause the job
-
-            return True, int(new_quota)
             
-        return False, None
+        else:
+
+            # Increase little by little the quota to reach the maximum quota
+            new_quota = min(self.JOB_INFOS[job_type]["Maximum_Quota"], self.JOB_INFOS[job_type]["Current_Quota"] + self.JOB_INFOS[job_type]["Delta_Quota"])
+
+        return int(new_quota)
