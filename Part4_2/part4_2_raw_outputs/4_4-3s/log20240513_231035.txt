@@ -1,0 +1,215 @@
+2024-05-13T23:10:35.967403 start scheduler
+2024-05-13T23:10:35.967430 start memcached [0,1] 2
+2024-05-13T23:10:36.650218 start blackscholes [2,3] 2
+2024-05-13T23:10:36.675724 custom blackscholes Job+quota+percentage+105.0
+2024-05-13T23:10:43.607868 start radix [1] 1
+2024-05-13T23:10:43.813940 pause radix
+2024-05-13T23:10:45.798885 custom blackscholes Job+quota+percentage+110.0
+2024-05-13T23:10:48.806382 custom blackscholes Job+quota+percentage+115.0
+2024-05-13T23:10:51.814416 custom blackscholes Job+quota+percentage+120.0
+2024-05-13T23:10:54.816278 custom blackscholes Job+quota+percentage+125.0
+2024-05-13T23:10:57.826051 custom blackscholes Job+quota+percentage+130.0
+2024-05-13T23:11:00.845622 custom blackscholes Job+quota+percentage+135.0
+2024-05-13T23:11:03.855441 custom blackscholes Job+quota+percentage+140.0
+2024-05-13T23:11:06.868612 custom blackscholes Job+quota+percentage+145.0
+2024-05-13T23:11:09.886776 custom blackscholes Job+quota+percentage+150.0
+2024-05-13T23:11:12.887542 custom blackscholes Job+quota+percentage+155.0
+2024-05-13T23:11:13.921613 unpause radix
+2024-05-13T23:11:13.965144 custom radix Job+quota+percentage+64.0
+2024-05-13T23:11:15.926089 custom blackscholes Job+quota+percentage+160.0
+2024-05-13T23:11:16.962516 pause radix
+2024-05-13T23:11:18.968370 custom blackscholes Job+quota+percentage+165.0
+2024-05-13T23:11:21.941082 update_cores memcached [0]
+2024-05-13T23:11:21.969572 custom blackscholes Job+quota+percentage+170.0
+2024-05-13T23:11:23.002267 unpause radix
+2024-05-13T23:11:23.046841 custom radix Job+quota+percentage+88.0
+2024-05-13T23:11:24.974130 update_cores memcached [0,1]
+2024-05-13T23:11:25.014726 custom blackscholes Job+quota+percentage+175.0
+2024-05-13T23:11:26.053270 pause radix
+2024-05-13T23:11:28.009206 update_cores memcached [0]
+2024-05-13T23:11:28.035537 custom blackscholes Job+quota+percentage+180.0
+2024-05-13T23:11:29.065665 unpause radix
+2024-05-13T23:11:29.106213 custom radix Job+quota+percentage+100.0
+2024-05-13T23:11:31.035252 update_cores memcached [0,1]
+2024-05-13T23:11:31.080684 custom blackscholes Job+quota+percentage+185.0
+2024-05-13T23:11:32.125359 pause radix
+2024-05-13T23:11:34.129497 custom blackscholes Job+quota+percentage+190.0
+2024-05-13T23:11:37.138137 custom blackscholes Job+quota+percentage+195.0
+2024-05-13T23:11:40.145558 custom blackscholes Job+quota+percentage+200.0
+2024-05-13T23:11:41.179215 unpause radix
+2024-05-13T23:11:41.223666 custom radix Job+quota+percentage+16.2
+2024-05-13T23:11:44.195192 pause radix
+2024-05-13T23:11:46.708143 end blackscholes
+2024-05-13T23:11:47.891042 start ferret [2,3] 2
+2024-05-13T23:11:47.928274 custom ferret Job+quota+percentage+105.0
+2024-05-13T23:11:50.789746 custom ferret Job+quota+percentage+110.0
+2024-05-13T23:11:53.619456 custom ferret Job+quota+percentage+115.0
+2024-05-13T23:11:56.450390 custom ferret Job+quota+percentage+120.0
+2024-05-13T23:11:59.336256 custom ferret Job+quota+percentage+125.0
+2024-05-13T23:12:02.186906 custom ferret Job+quota+percentage+130.0
+2024-05-13T23:12:04.547817 update_cores memcached [0]
+2024-05-13T23:12:05.003973 custom ferret Job+quota+percentage+135.0
+2024-05-13T23:12:05.421590 unpause radix
+2024-05-13T23:12:05.464038 custom radix Job+quota+percentage+100.0
+2024-05-13T23:12:07.403737 update_cores memcached [0,1]
+2024-05-13T23:12:07.863386 custom ferret Job+quota+percentage+140.0
+2024-05-13T23:12:08.320894 custom radix Job+quota+percentage+64.0
+2024-05-13T23:12:10.744989 custom ferret Job+quota+percentage+145.0
+2024-05-13T23:12:11.172809 pause radix
+2024-05-13T23:12:13.644046 custom ferret Job+quota+percentage+150.0
+2024-05-13T23:12:16.463173 custom ferret Job+quota+percentage+155.0
+2024-05-13T23:12:16.881271 unpause radix
+2024-05-13T23:12:16.922875 custom radix Job+quota+percentage+76.0
+2024-05-13T23:12:19.359769 custom ferret Job+quota+percentage+160.0
+2024-05-13T23:12:19.785695 pause radix
+2024-05-13T23:12:22.232924 custom ferret Job+quota+percentage+165.0
+2024-05-13T23:12:25.081271 custom ferret Job+quota+percentage+170.0
+2024-05-13T23:12:27.909024 custom ferret Job+quota+percentage+175.0
+2024-05-13T23:12:28.328330 unpause radix
+2024-05-13T23:12:28.387749 custom radix Job+quota+percentage+40.2
+2024-05-13T23:12:30.818450 custom ferret Job+quota+percentage+180.0
+2024-05-13T23:12:31.238749 pause radix
+2024-05-13T23:12:33.706269 custom ferret Job+quota+percentage+185.0
+2024-05-13T23:12:36.542824 custom ferret Job+quota+percentage+190.0
+2024-05-13T23:12:39.384025 custom ferret Job+quota+percentage+195.0
+2024-05-13T23:12:42.244278 custom ferret Job+quota+percentage+200.0
+2024-05-13T23:12:48.310775 unpause radix
+2024-05-13T23:12:48.354127 custom radix Job+quota+percentage+88.0
+2024-05-13T23:12:50.289924 update_cores memcached [0]
+2024-05-13T23:12:51.195109 custom radix Job+quota+percentage+4.2
+2024-05-13T23:12:53.132694 update_cores memcached [0,1]
+2024-05-13T23:12:54.015069 custom radix Job+quota+percentage+88.0
+2024-05-13T23:12:55.952639 update_cores memcached [0]
+2024-05-13T23:12:56.831235 pause radix
+2024-05-13T23:12:58.829597 update_cores memcached [0,1]
+2024-05-13T23:13:10.961820 unpause radix
+2024-05-13T23:13:11.008007 custom radix Job+quota+percentage+64.0
+2024-05-13T23:13:13.832213 custom radix Job+quota+percentage+28.2
+2024-05-13T23:13:16.630318 pause radix
+2024-05-13T23:13:21.443860 update_cores memcached [0]
+2024-05-13T23:13:22.295569 unpause radix
+2024-05-13T23:13:22.338565 custom radix Job+quota+percentage+100.0
+2024-05-13T23:13:24.272873 update_cores memcached [0,1]
+2024-05-13T23:13:25.158223 custom radix Job+quota+percentage+28.2
+2024-05-13T23:13:27.949605 pause radix
+2024-05-13T23:13:39.239349 unpause radix
+2024-05-13T23:13:39.284808 custom radix Job+quota+percentage+52.2
+2024-05-13T23:13:42.083223 pause radix
+2024-05-13T23:13:44.940649 unpause radix
+2024-05-13T23:13:44.985336 custom radix Job+quota+percentage+100.0
+2024-05-13T23:13:46.923468 update_cores memcached [0]
+2024-05-13T23:13:47.816263 custom radix Job+quota+percentage+65.4
+2024-05-13T23:13:49.753087 update_cores memcached [0,1]
+2024-05-13T23:13:50.639877 custom radix Job+quota+percentage+28.2
+2024-05-13T23:13:53.437301 pause radix
+2024-05-13T23:13:56.286992 unpause radix
+2024-05-13T23:13:56.333753 custom radix Job+quota+percentage+64.0
+2024-05-13T23:13:59.160351 custom radix Job+quota+percentage+52.0
+2024-05-13T23:14:01.961521 pause radix
+2024-05-13T23:14:07.596677 unpause radix
+2024-05-13T23:14:07.648786 custom radix Job+quota+percentage+28.0
+2024-05-13T23:14:10.437501 pause radix
+2024-05-13T23:14:13.289259 unpause radix
+2024-05-13T23:14:13.348898 custom radix Job+quota+percentage+28.2
+2024-05-13T23:14:16.169168 custom radix Job+quota+percentage+40.2
+2024-05-13T23:14:18.074991 end radix
+2024-05-13T23:14:49.250013 update_cores memcached [0]
+2024-05-13T23:14:52.051741 update_cores memcached [0,1]
+2024-05-13T23:15:06.078769 update_cores memcached [0]
+2024-05-13T23:15:08.881022 update_cores memcached [0,1]
+2024-05-13T23:15:17.104960 end ferret
+2024-05-13T23:15:32.345459 start freqmine [2,3] 2
+2024-05-13T23:15:32.370867 custom freqmine Job+quota+percentage+105.0
+2024-05-13T23:15:35.051183 custom freqmine Job+quota+percentage+110.0
+2024-05-13T23:15:37.701057 custom freqmine Job+quota+percentage+115.0
+2024-05-13T23:15:40.352676 custom freqmine Job+quota+percentage+120.0
+2024-05-13T23:15:43.019357 custom freqmine Job+quota+percentage+125.0
+2024-05-13T23:15:45.692015 custom freqmine Job+quota+percentage+130.0
+2024-05-13T23:15:48.351402 custom freqmine Job+quota+percentage+135.0
+2024-05-13T23:15:51.014743 custom freqmine Job+quota+percentage+140.0
+2024-05-13T23:15:53.685585 custom freqmine Job+quota+percentage+145.0
+2024-05-13T23:15:56.353706 custom freqmine Job+quota+percentage+150.0
+2024-05-13T23:15:59.001440 custom freqmine Job+quota+percentage+155.0
+2024-05-13T23:16:01.673842 custom freqmine Job+quota+percentage+160.0
+2024-05-13T23:16:04.331868 custom freqmine Job+quota+percentage+165.0
+2024-05-13T23:16:06.980914 custom freqmine Job+quota+percentage+170.0
+2024-05-13T23:16:09.651632 custom freqmine Job+quota+percentage+175.0
+2024-05-13T23:16:12.330551 custom freqmine Job+quota+percentage+180.0
+2024-05-13T23:16:15.024471 custom freqmine Job+quota+percentage+185.0
+2024-05-13T23:16:17.703574 custom freqmine Job+quota+percentage+190.0
+2024-05-13T23:16:20.384266 custom freqmine Job+quota+percentage+195.0
+2024-05-13T23:16:23.031548 custom freqmine Job+quota+percentage+200.0
+2024-05-13T23:17:15.394882 update_cores memcached [0]
+2024-05-13T23:17:18.029210 update_cores memcached [0,1]
+2024-05-13T23:18:31.867712 update_cores memcached [0]
+2024-05-13T23:18:37.107755 update_cores memcached [0,1]
+2024-05-13T23:18:58.266676 update_cores memcached [0]
+2024-05-13T23:19:00.893566 update_cores memcached [0,1]
+2024-05-13T23:19:56.048307 end freqmine
+2024-05-13T23:19:56.779866 start canneal [2,3] 2
+2024-05-13T23:19:56.817627 custom canneal Job+quota+percentage+105.0
+2024-05-13T23:19:59.332764 custom canneal Job+quota+percentage+110.0
+2024-05-13T23:20:01.822539 custom canneal Job+quota+percentage+115.0
+2024-05-13T23:20:04.315074 custom canneal Job+quota+percentage+120.0
+2024-05-13T23:20:06.829750 custom canneal Job+quota+percentage+125.0
+2024-05-13T23:20:09.334869 custom canneal Job+quota+percentage+130.0
+2024-05-13T23:20:11.803997 custom canneal Job+quota+percentage+135.0
+2024-05-13T23:20:14.207506 update_cores memcached [0]
+2024-05-13T23:20:14.249141 custom canneal Job+quota+percentage+140.0
+2024-05-13T23:20:16.658720 update_cores memcached [0,1]
+2024-05-13T23:20:16.704273 custom canneal Job+quota+percentage+145.0
+2024-05-13T23:20:19.168052 custom canneal Job+quota+percentage+150.0
+2024-05-13T23:20:21.629840 custom canneal Job+quota+percentage+155.0
+2024-05-13T23:20:24.147965 custom canneal Job+quota+percentage+160.0
+2024-05-13T23:20:26.677568 custom canneal Job+quota+percentage+165.0
+2024-05-13T23:20:29.151084 custom canneal Job+quota+percentage+170.0
+2024-05-13T23:20:31.623832 custom canneal Job+quota+percentage+175.0
+2024-05-13T23:20:34.084250 custom canneal Job+quota+percentage+180.0
+2024-05-13T23:20:36.568144 custom canneal Job+quota+percentage+185.0
+2024-05-13T23:20:39.047495 custom canneal Job+quota+percentage+190.0
+2024-05-13T23:20:41.517083 custom canneal Job+quota+percentage+195.0
+2024-05-13T23:20:44.029030 custom canneal Job+quota+percentage+200.0
+2024-05-13T23:22:27.566666 end canneal
+2024-05-13T23:22:38.266021 start dedup [2,3] 2
+2024-05-13T23:22:38.297979 custom dedup Job+quota+percentage+105.0
+2024-05-13T23:22:40.519488 update_cores memcached [0]
+2024-05-13T23:22:40.581752 custom dedup Job+quota+percentage+110.0
+2024-05-13T23:22:42.833694 update_cores memcached [0,1]
+2024-05-13T23:22:42.925147 custom dedup Job+quota+percentage+115.0
+2024-05-13T23:22:45.296308 custom dedup Job+quota+percentage+120.0
+2024-05-13T23:22:47.643953 custom dedup Job+quota+percentage+125.0
+2024-05-13T23:22:50.935866 custom dedup Job+quota+percentage+130.0
+2024-05-13T23:22:53.155754 update_cores memcached [0]
+2024-05-13T23:22:53.888032 custom dedup Job+quota+percentage+135.0
+2024-05-13T23:22:56.175503 custom dedup Job+quota+percentage+140.0
+2024-05-13T23:22:58.433548 update_cores memcached [0,1]
+2024-05-13T23:22:58.531746 custom dedup Job+quota+percentage+145.0
+2024-05-13T23:23:00.906683 custom dedup Job+quota+percentage+150.0
+2024-05-13T23:23:03.269808 custom dedup Job+quota+percentage+155.0
+2024-05-13T23:23:05.630685 custom dedup Job+quota+percentage+160.0
+2024-05-13T23:23:12.116805 end dedup
+2024-05-13T23:23:13.133989 start vips [2,3] 2
+2024-05-13T23:23:13.169389 custom vips Job+quota+percentage+105.0
+2024-05-13T23:23:15.377415 custom vips Job+quota+percentage+110.0
+2024-05-13T23:23:17.630375 custom vips Job+quota+percentage+115.0
+2024-05-13T23:23:19.391010 update_cores memcached [0]
+2024-05-13T23:23:19.736849 custom vips Job+quota+percentage+120.0
+2024-05-13T23:23:21.502651 update_cores memcached [0,1]
+2024-05-13T23:23:21.858865 custom vips Job+quota+percentage+125.0
+2024-05-13T23:23:24.024185 custom vips Job+quota+percentage+130.0
+2024-05-13T23:23:27.184042 custom vips Job+quota+percentage+135.0
+2024-05-13T23:23:30.100947 custom vips Job+quota+percentage+140.0
+2024-05-13T23:23:33.233482 custom vips Job+quota+percentage+145.0
+2024-05-13T23:23:35.388821 custom vips Job+quota+percentage+150.0
+2024-05-13T23:23:37.523386 custom vips Job+quota+percentage+155.0
+2024-05-13T23:23:39.660982 custom vips Job+quota+percentage+160.0
+2024-05-13T23:23:41.813486 custom vips Job+quota+percentage+165.0
+2024-05-13T23:23:43.992910 custom vips Job+quota+percentage+170.0
+2024-05-13T23:23:46.136152 custom vips Job+quota+percentage+175.0
+2024-05-13T23:23:48.257359 custom vips Job+quota+percentage+180.0
+2024-05-13T23:23:50.974871 custom vips Job+quota+percentage+185.0
+2024-05-13T23:23:53.943093 custom vips Job+quota+percentage+190.0
+2024-05-13T23:23:56.088710 custom vips Job+quota+percentage+195.0
+2024-05-13T23:23:58.267684 custom vips Job+quota+percentage+200.0
+2024-05-13T23:24:16.706752 end vips
+2024-05-13T23:24:16.706928 end scheduler
