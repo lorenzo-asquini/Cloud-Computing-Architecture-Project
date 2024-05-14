@@ -13,15 +13,13 @@ def start_end_epoch_scheduler(log_file):
 
     return epoch_times
 
-# Function to parse start timestamp from the file and return it in milliseconds since epoch
-def parse_start_timestamp(file_path):
+def parse_memcache_start_timestamp(file_path):
     with open(file_path, 'r') as file:
         for line in file:
             if line.startswith("Timestamp start:"):
                 start_timestamp = int(line.split(":")[1].strip())
                 return start_timestamp
 
-# Function to process read lines and adjust timestamps
 def process_read_lines(file_path, start_timestamp_ms):
     data = []
     with open(file_path, 'r') as file:
@@ -36,13 +34,13 @@ def process_read_lines(file_path, start_timestamp_ms):
 log_file = 'log4.txt'
 epoch_times = start_end_epoch_scheduler(log_file)
 memcache_log_file = "mlog4.txt"
-start_timestamp_ms = parse_start_timestamp(memcache_log_file)
+start_timestamp_ms = parse_memcache_start_timestamp(memcache_log_file)
 data = process_read_lines(memcache_log_file, start_timestamp_ms)
 
 tot_points = 0
 slo = 0
 for time, value in data:
-    if time-10000 > epoch_times[0] and time+10000 < epoch_times[-1]:
+    if time-3000 > epoch_times[0] and time+3000 < epoch_times[-1]:
         if(value > 1000):
             print(time, value)
             slo += 1
