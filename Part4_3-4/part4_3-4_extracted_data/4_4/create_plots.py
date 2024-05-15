@@ -46,7 +46,7 @@ def extract_measure_memcache_data(file_path):
             tokens = line.split()
 
             # Each data point is separated with 10 seconds from the previous one
-            data["timestamp"].append(start_timestamp + read_line_idx * 10000)
+            data["timestamp"].append(start_timestamp + read_line_idx * 3000)
             data["p95"].append(float(tokens[12]))
             data["qps"].append(float(tokens[16]))
             read_line_idx += 1
@@ -126,8 +126,8 @@ def thousands_formatter(x, pos):
 
 def plot(file_idx):
    
-    memcache_data = extract_measure_memcache_data(f"../../part4_3-4_raw_outputs/4_3/mcperf_{file_idx}.txt")
-    job_times, memcache_cores = extract_jobs_data(f"../../part4_3-4_raw_outputs/4_3/jobs_{file_idx}.txt")
+    memcache_data = extract_measure_memcache_data(f"../../part4_3-4_raw_outputs/4_4_3s/mcperf_{file_idx}.txt")
+    job_times, memcache_cores = extract_jobs_data(f"../../part4_3-4_raw_outputs/4_4_3s/jobs_{file_idx}.txt")
 
     # Get the range of times where there are jobs running
     first_job_start = 12345678901234567890 # Large number just to be able to use min

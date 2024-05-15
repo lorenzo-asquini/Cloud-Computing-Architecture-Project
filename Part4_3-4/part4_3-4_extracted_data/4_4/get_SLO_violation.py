@@ -1,50 +1,65 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
+# The job logger keeps track of time with datetime dates.
+# Adjust the timezone and take the time with ms accuracy
+def epoch_ms_from_datetime(datetime_line):
+    datetime_str = datetime_line.strip().split()[0]
+    datetime_obj = datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S.%f')
+    epoch_time = int((datetime_obj.timestamp() + 7200) * 1000)  # Adjust time zone. From s to ms
+    return epoch_time
+
+# Find the timestamps of start and end of the scheduler
 def start_end_epoch_scheduler(log_file):
-    epoch_times = []
 
     with open(log_file, 'r') as file:
         for line in file:
-            if line.strip() != "":
-                timestamp = line.strip().split()[0]
-                datetime_obj = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%f')
-                epoch_time = int(datetime_obj.timestamp()) + 2 * 3600 # Adjust time zone
-                epoch_times.append(epoch_time * 1000) # To ms
+            if "start scheduler" in line:
+                start_epoch = epoch_ms_from_datetime( line.strip().split()[0] )
+            if "end scheduler" in line:
+                end_epoch = epoch_ms_from_datetime( line.strip().split()[0] )
 
-    return epoch_times
+    return start_epoch, end_epoch
 
-def parse_memcache_start_timestamp(file_path):
-    with open(file_path, 'r') as file:
-        for line in file:
-            if line.startswith("Timestamp start:"):
-                start_timestamp = int(line.split(":")[1].strip())
-                return start_timestamp
+# Register when SLO was not respected
+def process_read_lines(file_path):
+    with open(file_path, "r") as file:
+        lines = file.readlines()
 
-def process_read_lines(file_path, start_timestamp_ms):
-    data = []
-    with open(file_path, 'r') as file:
-        for line in file:
-            if line.startswith("read"):
-                start_timestamp_ms += 3000  # Increase by 10 seconds for each line
-                line_parts = line.strip().split()
-                p95_value = float(line_parts[12])  # Assuming p95 is always 7th from the end
-                data.append((start_timestamp_ms, p95_value))
-    return data
+    # Extract start timestamps
+    for line in lines:
+        if line.startswith("Timestamp start:"):
+            start_timestamp = int(line.split(":")[1].strip())
+            break
 
-log_file = 'log4.txt'
-epoch_times = start_end_epoch_scheduler(log_file)
-memcache_log_file = "mlog4.txt"
-start_timestamp_ms = parse_memcache_start_timestamp(memcache_log_file)
-data = process_read_lines(memcache_log_file, start_timestamp_ms)
+    latency_data = []
 
-tot_points = 0
-slo = 0
-for time, value in data:
-    if time-3000 > epoch_times[0] and time+3000 < epoch_times[-1]:
-        if(value > 1000):
-            print(time, value)
-            slo += 1
+    nr_datapoints = 0  # Skip lines without useful data
+    for line in lines:
+        if line.startswith("read"):
+            tokens = line.split()
+            timestamp = start_timestamp + nr_datapoints * 3000
+            p95_latency = float(tokens[12])
 
-        tot_points += 1
-print(epoch_times[0], epoch_times[-1])
-print(tot_points, slo, 100*slo/tot_points)
+            latency_data.append((timestamp, p95_latency))
+
+            nr_datapoints += 1
+
+    return latency_data
+
+for file_idx in range(1, 4):
+    memcache_log_file = f"../../part4_3-4_raw_outputs/4_4_3s/mcperf_{file_idx}.txt"
+    log_file = f"../../part4_3-4_raw_outputs/4_4_3s/jobs_{file_idx}.txt"
+
+    scheduler_start, scheduler_end = start_end_epoch_scheduler(log_file)
+    latency_data = process_read_lines(memcache_log_file)
+
+    slo_violations = 0
+    nr_datapoints = 0
+    for time, latency in latency_data:
+        # Consider also the case where the scheduler starts in the middle of a measure section
+        if time > scheduler_start-3000 and time < scheduler_end+3000:
+            if latency > 1000:
+                slo_violations += 1
+            nr_datapoints += 1
+
+    print(f"Nr datapoints: {nr_datapoints}, SLO violations: {slo_violations}, Percentage of violations: {100 * slo_violations / nr_datapoints:.2f}%")
