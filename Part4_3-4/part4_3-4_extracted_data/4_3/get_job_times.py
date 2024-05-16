@@ -45,6 +45,13 @@ def calculate_stats(folder_path):
                 if not "tot_time" in job_times[job]:
                     job_times[job]["tot_time"] = []
 
+                if not "pause" in job_times[job]:
+                    job_times[job]["pause"] = [[], [], []]
+
+                if not "unpause" in job_times[job]:
+                    job_times[job]["unpause"] = [[], [], []]
+
+                pauses = False
                 with open(os.path.join(folder_path, f"jobs_{idx}.txt")) as file:
                     
                     for line in file:
@@ -54,8 +61,29 @@ def calculate_stats(folder_path):
                         if f" end {job}" in line:
                             job_times[job]["end"].append(epoch_ms_from_datetime( line.strip().split()[0] ) / 1000)
 
+                        # Possibly multiple pause and unpause. The number of pause and unpause is equal
+                        if f" pause {job}" in line:
+                            job_times[job]["pause"][idx-1].append(epoch_ms_from_datetime( line.strip().split()[0]) / 1000)
+                            pauses = True
+
+                        if f" unpause {job}" in line:
+                            job_times[job]["unpause"][idx-1].append(epoch_ms_from_datetime( line.strip().split()[0]) / 1000)
+
                 # Calculate the total execution time of the last file for the current job
-                job_times[job]["tot_time"].append(job_times[job]["end"][-1] - job_times[job]["start"][-1])
+                if not pauses:
+                    # It's easy to calculate the execution time if there are no pauses
+                    job_times[job]["tot_time"].append(job_times[job]["end"][-1] - job_times[job]["start"][-1])
+                
+                else:
+                    #Calculate the execution time if there are pauses
+                    # For a job, take the entry relative to the pauses. From the array with all the pauses of this file, take the first value
+                    tot_time = job_times[job]['pause'][idx-1][0] - job_times[job]["start"][-1]
+
+                    for unpause_idx in range(len(job_times[job]['pause'][idx-1])-1):
+                        tot_time += job_times[job]['pause'][idx-1][unpause_idx+1] - job_times[job]['unpause'][idx-1][unpause_idx]
+
+                    tot_time += job_times[job]["end"][-1] - job_times[job]['unpause'][idx-1][-1]
+                    job_times[job]["tot_time"].append(tot_time)
 
     # Find the job that started first and the one that started last to get the total execution time
     for idx in range(3):
