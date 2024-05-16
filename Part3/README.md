@@ -36,4 +36,4 @@ Run the script `extract_info_from_mcperf_logs.py`. It will extract the P95 laten
 
 Run the script `extract_info_from_pods_logs.py`. It will extract the execution time, the start time and the stop time of the different workloads from the pods logs relative to different runs that are present in `part3_raw_outputs` and save the results in `part3_extracted_data`.
 
-In `part3_extracted_data` there is a Python script called `analyse_pod_times.py` that will calculate the average execution time and the standard deviation for the different workloads. The outer Python script, called `create_plots.py`, that will plot the P95 latency of memcached in the background and the scheduling of the different workloads.
+In `part3_extracted_data` there is a Python script called `analyse_pod_times.py` that will calculate the average execution time and the standard deviation for the different workloads. The outer Python script, called `create_plots.py`, that will plot the P95 latency of memcached in the background and the scheduling of the different workloads on top of it.
