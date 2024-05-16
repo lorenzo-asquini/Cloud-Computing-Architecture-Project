@@ -21,6 +21,7 @@ def extract_time_from_file(filename):
                     return (minutes * 60 + seconds) * 1000
     return None
 
+
 def main():
     all_workloads = ["blackscholes", "canneal", "dedup", "ferret", "freqmine", "radix", "vips"]
     all_threads_amount = ["1", "2", "4", "8"]
@@ -40,6 +41,7 @@ def main():
             time_ms = extract_time_from_file(filename)
             
             if time_ms is not None:
+                # The first time retrieved is the one relative to the case where only one thread is used
                 if one_thread_time is None:
                     one_thread_time = time_ms
                     
@@ -56,6 +58,7 @@ def main():
     # Plotting
     markers = ['o', 'v', '1', 's', 'p', '*', 'X']
     for (workload, speedup), marker in zip(speedup_data.items(), markers):
+
         plt.plot(all_threads_amount, speedup, label=workload, linewidth=2.5,
                  marker=marker, markersize=12, markeredgewidth=2.5)
 

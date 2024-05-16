@@ -18,7 +18,8 @@ def read_data(filename):
             data.append([float(values[0]), float(values[1]), float(values[2]), float(values[3])])
     return data
 
-# Plot information about interference. Transform ns to ms
+
+# Plot information about interference. Transform us to ms
 def plot_file(filename, marker):
     data = read_data(filename)
     x = [row[0] for row in data]
@@ -32,13 +33,16 @@ def plot_file(filename, marker):
     plt.errorbar(x, y, xerr=xerr_std, yerr=yerr_std, capsize=8, label=main_name, linewidth=2.5,
                  marker=marker, markersize=8, markerfacecolor='None', markeredgewidth=2.5)
 
+
 # Express thousands with K in plot
 def thousands_formatter(x, pos):
     return '{:.0f}K'.format(x * 1e-3)
 
+
 # Main names of the files
 interferences = ["none", "cpu", "l1d", "l1i", "l2", "llc", "membw"]
 markers = ['o', 'v', '1', 's', 'p', '*', 'X']
+
 
 # Plotting
 plt.figure()

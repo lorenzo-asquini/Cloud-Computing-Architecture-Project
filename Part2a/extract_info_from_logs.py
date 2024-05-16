@@ -20,6 +20,7 @@ def extract_time_from_file(filename):
                     return (minutes * 60 + seconds) * 1000
     return None
 
+
 def main():
     all_workloads = ["blackscholes", "canneal", "dedup", "ferret", "freqmine", "radix", "vips"]
     all_interferences = ["none", "cpu", "l1d", "l1i", "l2", "llc", "memBW"]
@@ -36,6 +37,7 @@ def main():
             time_ms = extract_time_from_file(filename)
             
             if time_ms is not None:
+                # The first time retrieved is the one relative to the case where there are no interferences
                 if none_interference_time is None:
                     none_interference_time = time_ms
                     

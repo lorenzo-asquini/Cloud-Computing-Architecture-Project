@@ -18,7 +18,8 @@ def read_data(filename):
             data.append([float(values[0]), float(values[1]), float(values[2]), float(values[3])])
     return data
 
-# Plot information about interference. Transform ns to ms
+
+# Plot information about interference. Transform us to ms
 def plot_file(filename, marker):
     data = read_data(filename)
     x = [row[0] for row in data]
@@ -37,13 +38,16 @@ def plot_file(filename, marker):
 
     plt.errorbar(x, y_fit, linewidth=2.5, label="Theoretical Response Time")
 
+
 # Express thousands with K in plot
 def thousands_formatter(x, pos):
     return '{:.0f}K'.format(x * 1e-3)
 
-# Main names of the files
+
+# Main names of the files with data to fit
 interferences = ["none"]
 markers = ['o']
+
 
 # Plotting
 plt.figure()

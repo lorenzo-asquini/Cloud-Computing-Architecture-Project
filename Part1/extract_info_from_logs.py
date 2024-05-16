@@ -13,10 +13,12 @@ def read_data(filename):
     data = pd.read_csv(filename, header=None, skiprows=1, delim_whitespace=True)
     return data
 
+
 def extract_values_from_line(data, line_number):
     p95 = float(data.iloc[line_number, 12])  # Extracting p95
     qps = float(data.iloc[line_number, 16])  # Extracting QPS
     return (p95, qps)
+
 
 # Get min, max and avg of p95 across files of a specific line. Same thing with avg qps
 def calculate_statistics(values_p95, values_qps):
@@ -25,6 +27,7 @@ def calculate_statistics(values_p95, values_qps):
     avg_qps = np.mean(values_qps)
     std_qps = np.std(values_qps)
     return (avg_qps, std_qps, avg_p95, std_p95)
+
 
 def main():
     interferences = ["none", "cpu", "l1d", "l1i", "l2", "llc", "membw"]
@@ -54,6 +57,7 @@ def main():
             output_file.write(f"{avg_qps:.1f}, {std_qps:.1f}, {avg_p95:.1f}, {std_p95:.1f}\n")
 
         output_file.close()
+
 
 if __name__ == "__main__":
     main()
