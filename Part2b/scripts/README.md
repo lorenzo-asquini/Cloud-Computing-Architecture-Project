@@ -14,7 +14,7 @@ Run the script with `./deploy_cluster.sh`. If there is a permission denied error
 Pay attention to possible errors. In particular, it is particularly possible that there may be some errors in setting up the SSH key. If so, run the command manually after the cluster is up (change the file name):
 
 ```
-kops create secret --name part1.k8s.local sshpublickey admin -i ~/.ssh/file.pub
+kops create secret --name part2b.k8s.local sshpublickey admin -i ~/.ssh/file.pub
 ```
 
 Even if at the end it says that the parsec server was not labeled, it should still be ok.

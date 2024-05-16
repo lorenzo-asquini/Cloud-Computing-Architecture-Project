@@ -1,5 +1,10 @@
+####################################
+# Create the plot showing the P95 latency of memcached and the scheduling of different jobs
+####################################
+
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
 
 colors = {
     "parsec-blackscholes": "#CCA000",
@@ -41,7 +46,7 @@ for index in range(1, 4):
 
     # Plot the bars
     bar_width = mcperf_stats['ts_end'].diff().min()
-    plt.bar(mcperf_stats['ts_start'], mcperf_stats['p95'], width=bar_width, color='indigo', alpha=0.1, edgecolor='black', linewidth=0.5, zorder=0)
+    plt.bar(mcperf_stats['ts_start'], mcperf_stats['p95'], width=bar_width, color='indigo', alpha=0.15, edgecolor='black', linewidth=1, zorder=0)
 
     # Add vertical lines for each pair of values in pods_times['Start'] and pods_times['Stop']
     for i, row in pods_times.iterrows():
@@ -49,8 +54,10 @@ for index in range(1, 4):
         if(workload == 'memcached'):
             continue
         
-        plt.axvline(row['Start'], color=colors[workload], linestyle='-', linewidth=3, zorder=1, label=workload_labels[workload]+" - Start")  # Thick vertical line
-        plt.axvline(row['Stop'], color=colors[workload], linestyle='--', linewidth=3, zorder=1, label=workload_labels[workload]+" - End")
+        plt.axvline(row['Start'], color=colors[workload], linestyle='-', linewidth=3.5, zorder=1,
+                     path_effects=[pe.Stroke(linewidth=4.5, foreground='black'), pe.Normal()], label=workload_labels[workload]+" - Start")  # Thick vertical line
+        plt.axvline(row['Stop'], color=colors[workload], linestyle='--', linewidth=3.5, zorder=1,
+                     path_effects=[pe.Stroke(linewidth=4.5, foreground='black'), pe.Normal()], label=workload_labels[workload]+" - End")
 
     #### Plot look
 

@@ -8,10 +8,10 @@ from datetime import datetime
 
 time_format = '%Y-%m-%dT%H:%M:%SZ'
 for index in range(1, 4):
-    file = open(f"../part3_raw_outputs/pods_{index}.json", 'r')
+    file = open(f"part3_raw_outputs/pods_{index}.json", 'r')
     json_file = json.load(file)
 
-    output_file = open(f"time_pods_{index}.txt", 'w')
+    output_file = open(f"part3_extracted_data/time_pods_{index}.txt", 'w')
     output_file.write("Workload,Execution Time,Start,Stop\n")
 
     start_times = []

@@ -24,7 +24,7 @@ Inside the file, change the value of the variable `CCA_PROJECT_PUB_KEY` accordin
 
 Run the script with `./setup_agent_measure.sh`. If there is a permission denied error, run `chmod 744 setup_agent_measure.sh` in order to set the permission to execute the script.
 
-This script will upload and run the script `remote_setup.sh` (which must be on the same folder) on the servers. It will ask multiple times for the SSH password if you have set a password for the SSH key.
+This script will upload and run the script `remote_setup.sh` (which must be on the same folder) on the servers. It will ask multiple times for the SSH password if you have set a password for the SSH key. It may be possible that the same error relative to the incompatibilities between newlines in Windows and Linux may appear, so pay attention to the console output.
 
 ## Run the tests on all interferences for multiple times
 

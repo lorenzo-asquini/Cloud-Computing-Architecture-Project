@@ -3,7 +3,6 @@
 ####################################
 
 import pandas as pd
-import os
 from tabulate import tabulate
 
 def calculate_stats(file_paths):
