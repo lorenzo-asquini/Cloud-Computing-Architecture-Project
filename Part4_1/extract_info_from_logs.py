@@ -12,15 +12,18 @@
 import numpy as np
 import pandas as pd
 
+
 # Read data from raw file
 def read_data(filename):
     data = pd.read_csv(filename, header=None, skiprows=1, delimiter=r"\s+")
     return data
 
+
 def extract_values_from_line_memcache(data_memcache, memcache_line_number):
     p95 = float(data_memcache.iloc[memcache_line_number, 12])  # Extracting p95
     qps = float(data_memcache.iloc[memcache_line_number, 16])  # Extracting QPS
     return (p95, qps)
+
 
 def get_cpu_usage_in_section(data_cpu, data_memcache, memcache_line_number):
     ts_start = float(data_memcache.iloc[memcache_line_number, 18])
@@ -30,6 +33,7 @@ def get_cpu_usage_in_section(data_cpu, data_memcache, memcache_line_number):
     cpu_within_range = data_cpu[(data_cpu["timestamp"] >= ts_start) & (data_cpu["timestamp"] <= ts_end)]
     return cpu_within_range["cpu_usage"].mean()
 
+
 # Get avg and std of p95 and qps across files of a specific line. Get avg of cpu usage
 def calculate_statistics(values_p95, values_qps, values_cpu_usage):
     avg_p95 = np.mean(values_p95)
@@ -38,6 +42,7 @@ def calculate_statistics(values_p95, values_qps, values_cpu_usage):
     std_qps = np.std(values_qps)
     avg_cpu = np.mean(values_cpu_usage)
     return (avg_qps, std_qps, avg_p95, std_p95, avg_cpu)
+
 
 def main():
     threads = ["1", "2"]
@@ -77,6 +82,7 @@ def main():
                 output_file.write(f"{avg_qps:.1f}, {std_qps:.1f}, {avg_p95:.1f}, {std_p95:.1f}, {avg_cpu:.1f}\n")
 
             output_file.close()
+
 
 if __name__ == "__main__":
     main()

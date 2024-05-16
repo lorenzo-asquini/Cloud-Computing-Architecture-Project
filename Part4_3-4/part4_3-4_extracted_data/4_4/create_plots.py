@@ -1,6 +1,13 @@
+####################################
+# Plot A: QPS, P95 latency and job scheduling over time
+# Plot B: QPS, cores assigned to memcached and job scheduling over time
+# The data must be located in "part4_3-4_raw_outputs"
+####################################
+
 import matplotlib.pyplot as plt
 from datetime import datetime
 from matplotlib.ticker import FuncFormatter
+
 
 # Colors required by the report rulers
 colors = {
@@ -201,7 +208,7 @@ def plot(file_idx):
     ## Axis
     axis_label_font = {'fontsize': 13, 'fontweight': 'bold'}
     ax1.set_xlabel('Time (s)', fontdict=axis_label_font)
-    ax1.set_ylabel('95th Percentile Latency (us)', fontdict=axis_label_font, labelpad=40)
+    ax1.set_ylabel('95th Percentile Latency (us)', fontdict=axis_label_font, labelpad=45)
     ax3.set_ylabel('QPS', fontdict=axis_label_font)   
 
     formatter = FuncFormatter(thousands_formatter)
@@ -316,6 +323,7 @@ def plot(file_idx):
     plt.subplots_adjust(left=0.06, right=0.92, top=0.95, bottom=0.09)
  
     plt.show()
+
 
 if __name__ == "__main__":
     for file_idx in range(1, 4):

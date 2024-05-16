@@ -37,6 +37,7 @@ class CPUBasedPolicy(Policy):
         JobContainer.DEDUP: "./run -a run -S parsec -p dedup -i native -n ",
     }
 
+    # Define the number of cores, the number of threads and the dependencies of each job
     JOB_INFOS = {
         "RADIX": {
             "Cores": ["1"],
@@ -78,6 +79,7 @@ class CPUBasedPolicy(Policy):
 
     base_job_cpu_period = 50000  # CPU period of a job. Used to change the quota of a job
 
+
     def __init__(self):
         memcache_pid = int(os.popen("cat /var/run/memcached/memcached.pid").read().strip())
         self.memcache_process = psutil.Process(memcache_pid)
@@ -85,20 +87,23 @@ class CPUBasedPolicy(Policy):
         for job_type in self.JOB_INFOS:
             self.JOB_INFOS[job_type]["Logged_Exit"] = False
 
-            # Start the jobs slowly to not stress too much memcache
+            # Start the jobs slowly to not stress too much memcached
             self.JOB_INFOS[job_type]["Maximum_Quota"] = int(self.base_job_cpu_period * len(self.JOB_INFOS[job_type]["Cores"]))
             self.JOB_INFOS[job_type]["Starting_Quota"] = int(self.JOB_INFOS[job_type]["Maximum_Quota"] / 2)
             self.JOB_INFOS[job_type]["Delta_Quota"] = int((self.JOB_INFOS[job_type]["Maximum_Quota"] - self.JOB_INFOS[job_type]["Starting_Quota"]) / 20)
             self.JOB_INFOS[job_type]["Current_Quota"] = self.JOB_INFOS[job_type]["Starting_Quota"]
 
+
     ### Handle memcache cores
     current_memcache_cores = 2 # The starting value is always 2
     change_memcache_cores_th = 20
+
 
     def setMemcacheTwoCores(self):
         self.memcache_process.cpu_affinity([0, 1])
     def setMemcacheOneCore(self):
         self.memcache_process.cpu_affinity([0])
+
 
     def adjustMemcacheCores(self):
         """
@@ -126,6 +131,7 @@ class CPUBasedPolicy(Policy):
         
         return -1  # No change
     
+
     ### Decide if it's possible to run a job
     def canRunJob(self, job_type: str, all_container_states: dict[str, ContainerState]):
         """
@@ -154,7 +160,8 @@ class CPUBasedPolicy(Policy):
 
         return can_start
     
-    ### Handle job quotas
+
+    ### Handle job CPU quotas
     def updateJobQuota(self, job_type: str):
         """
         If a job is not coexisting with memcache, increase its quota if it's lower than the maximum.

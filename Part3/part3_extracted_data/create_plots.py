@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 
+
 colors = {
     "parsec-blackscholes": "#CCA000",
     "parsec-canneal": "#CCCCAA",
@@ -16,6 +17,7 @@ colors = {
     "parsec-vips": "#CC0A00"
     }
 
+
 workload_labels = {
     "parsec-blackscholes": "Blackscholes - node-a-2core",
     "parsec-canneal": "Canneal - node-b-4core",
@@ -25,6 +27,7 @@ workload_labels = {
     "parsec-radix": "Radix - node-c-8core",
     "parsec-vips": "Vips - node-c-8core"
     }
+
 
 for index in range(1, 4):
     mcperf_stats = pd.read_csv(f"mcperf_stats_{index}.txt")

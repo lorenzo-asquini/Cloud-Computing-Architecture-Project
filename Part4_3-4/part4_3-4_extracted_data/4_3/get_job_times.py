@@ -1,5 +1,6 @@
 ####################################
 # Get average execution time and standard deviation for the different jobs
+# The data must be located in "part4_3-4_raw_outputs"
 ####################################
 
 import os
@@ -14,6 +15,7 @@ def epoch_ms_from_datetime(datetime_line):
     datetime_obj = datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S.%f')
     epoch_time = int((datetime_obj.timestamp() + 7200) * 1000)  # Adjust time zone. From s to ms
     return epoch_time
+
 
 # Extract data from the jobs log
 def calculate_stats(folder_path):
@@ -88,6 +90,7 @@ def main():
         table_data.append([job, avg_time, std_time])
 
     print(tabulate(table_data, headers=["Job", "Avg (s)", "Std (s)"], tablefmt="grid"))
+
 
 if __name__ == "__main__":
     main()

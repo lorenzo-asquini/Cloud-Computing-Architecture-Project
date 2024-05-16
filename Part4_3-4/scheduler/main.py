@@ -130,7 +130,7 @@ def main():
                     official_logger.custom_event(job_type, f"Job quota percentage {100*new_job_cpu_quota/policy.base_job_cpu_period:.1f}")
                     logging.info(f"New job quota for {job_type.name} is {100*new_job_cpu_quota/policy.base_job_cpu_period:.1f}%")
 
-        sleep(1.5)  # Act fast because load can change rapidly
+        sleep(1.5)  # Have a relatively large sleep to avoid having the scheduler using too much CPU
 
     # Give 2 cores to memcache before exiting
     if(policy.current_memcache_cores != 2):

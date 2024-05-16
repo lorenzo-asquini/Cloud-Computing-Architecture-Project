@@ -1,3 +1,8 @@
+####################################
+# Calculate the SLO violation while the different jobs were running
+# The data must be located in "part4_3-4_raw_outputs"
+####################################
+
 from datetime import datetime
 
 # The job logger keeps track of time with datetime dates.

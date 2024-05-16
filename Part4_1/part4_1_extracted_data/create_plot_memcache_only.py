@@ -6,6 +6,7 @@ import os
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
+
 # Read data from file
 def read_data(filename):
     data = []
@@ -17,6 +18,7 @@ def read_data(filename):
             # avg_qps, std_qps, avg_p95, std_p95
             data.append([float(values[0]), float(values[1]), float(values[2]), float(values[3])])
     return data
+
 
 # Plot information about different thread-cores configurations
 def plot_file(filename, marker):
@@ -32,13 +34,16 @@ def plot_file(filename, marker):
     plt.errorbar(x, y, xerr=xerr_std, yerr=yerr_std, capsize=8, label=main_name, linewidth=2.5,
                  marker=marker, markersize=8, markerfacecolor='None', markeredgewidth=2.5)
 
+
 # Express thousands with K in plot
 def thousands_formatter(x, pos):
     return '{:.0f}K'.format(x * 1e-3)
 
+
 # Main names of the files
 configurations = [(1,1), (1,2), (2,1), (2,2)]  #(threads, cores)
 markers = ['o', 'v', '1', 's']
+
 
 # Plotting
 plt.figure()

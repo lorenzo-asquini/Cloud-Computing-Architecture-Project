@@ -22,11 +22,13 @@ def calculate_stats(file_paths):
     
     return stats
 
+
 def main():
     file_paths = [f"time_pods_{i}.txt" for i in range(1, 4)]
     stats = calculate_stats(file_paths)
 
     print(tabulate(stats[['Workload', 'mean', 'std']], headers=["Workload", "Average (s)", "Std (s)"], tablefmt="grid"))
+
 
 if __name__ == "__main__":
     main()

@@ -5,6 +5,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
+
 # Read data from file
 def read_data(filename):
     data = []
@@ -17,13 +18,16 @@ def read_data(filename):
             data.append([float(values[0]), float(values[2]), float(values[4])])
     return data
 
+
 # Express thousands with K in plot
 def thousands_formatter(x, pos):
     return '{:.0f}K'.format(x * 1e-3)
 
+
 # Main names of the files
 cores = [1, 2]
 markers = ['o', 'x']  # One line for p95 latency and one line for cpu usage
+
 
 # Plotting
 plt.figure()
