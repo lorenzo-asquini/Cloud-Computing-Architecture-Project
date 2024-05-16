@@ -34,3 +34,5 @@ This script will upload and run the scripts `remote_setup.sh` and `remote_setup_
 Consider the file `run_once.sh`.
 
 Run the script with `./run_once.sh`. If there is a permission denied error, run `chmod 744 run_once.sh` in order to set the permission to execute the script. You will need to run the script multiple times, one for each run you want to execute.
+
+When running the script, it's necessary to give as an argument the number of seconds you want the measurement to last. This is particularly important considering that the measurement needs to be long enough to comprehend all the job executions, and that the log is printed only at the end of the measurement.
