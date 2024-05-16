@@ -87,7 +87,7 @@ for nr_cores in cores:
     lines2, labels2 = ax2.get_legend_handles_labels()
     ax2.legend(lines1 + lines2, labels1 + labels2, fontsize=13)
 
-    ax1.set_xlim(0, 125000)
+    ax1.set_xlim(0, 130000)
     ax1.set_ylim(0, 2250)
     ax2.set_ylim(0, 100 * nr_cores)
 
