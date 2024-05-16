@@ -6,7 +6,7 @@
 # Each file with cpu usage data should be named with the pattern:
 # cpu_usage_threads-{nr_threads}_cores-{cpu_conf}_{iteration}.txt
 #
-# The results are saved in a folder called "part1_extracted_data" (created beforehand)
+# The results are saved in a folder called "part4_1_extracted_data" (created beforehand)
 ######
 
 import numpy as np
@@ -46,7 +46,7 @@ def main():
         for nr_cores, core_conf in enumerate(cores):
             print(f"Considering {thread} threads and {core_conf} core configuration")
 
-            output_file = open(f"threads_{thread}_cores_{nr_cores+1}.txt", "w")
+            output_file = open(f"part4_1_extracted_data/threads_{thread}_cores_{nr_cores+1}.txt", "w")
             output_file.write("avg_qps, std_qps, avg_p95, std_p95, avg_cpu\n")
             
             for line_number in range(25):
@@ -57,8 +57,8 @@ def main():
                 values_cpu_usage_runs = []
                 
                 for i in range(3):  # Files contain an index the run index
-                    filename_memcache = f"../part4_1_raw_outputs/threads-{thread}_cores-{core_conf}_{i}.txt"
-                    filename_cpu = f"../part4_1_raw_outputs/cpu_usage_threads-{thread}_cores-{core_conf}_{i}.txt"
+                    filename_memcache = f"part4_1_raw_outputs/threads-{thread}_cores-{core_conf}_{i}.txt"
+                    filename_cpu = f"part4_1_raw_outputs/cpu_usage_threads-{thread}_cores-{core_conf}_{i}.txt"
                     
                     data_memcache = read_data(filename_memcache)
                     data_cpu = read_data(filename_cpu)

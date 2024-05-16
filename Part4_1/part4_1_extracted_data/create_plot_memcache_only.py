@@ -1,5 +1,5 @@
 ######
-# The input format should be the one created using the script "info_memcache_log.py"
+# The input format should be the one created using the script "extract_info_from_logs.py"
 ######
 
 import os
@@ -51,7 +51,7 @@ for conf, marker in zip(configurations, markers):
 ## Axis
 axis_label_font = {'fontsize': 13, 'fontweight': 'bold'}
 plt.xlabel('Queries Per Second (QPS)', fontdict=axis_label_font)
-plt.ylabel('95th Percentile Latency (ms)', fontdict=axis_label_font)
+plt.ylabel('95th Percentile Latency (us)', fontdict=axis_label_font)
 
 ## Title
 title_font = {'fontsize': 14, 'fontweight': 'bold'}

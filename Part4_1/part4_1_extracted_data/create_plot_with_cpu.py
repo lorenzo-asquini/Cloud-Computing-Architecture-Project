@@ -1,8 +1,7 @@
 ######
-# The input format should be the one created using the script "info_from_logs.py"
+# The input format should be the one created using the script "extract_info_from_logs.py"
 ######
 
-import os
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
@@ -55,18 +54,18 @@ for nr_cores in cores:
     axis_label_font = {'fontsize': 13, 'fontweight': 'bold'}
     ax1.set_xlabel('Queries Per Second (QPS)', fontdict=axis_label_font)
     ax1.set_ylabel('95th Percentile Latency (us)', fontdict=axis_label_font)
-    ax2.set_ylabel('Average CPU usage (%)', fontdict=axis_label_font)
+    ax2.set_ylabel('Average CPU Usage (%)', fontdict=axis_label_font)
 
     ## Title
     title_font = {'fontsize': 14, 'fontweight': 'bold'}
     plt.title('''
-    95th Percentile Latency and Average CPU usage\n
+    95th Percentile Latency and Average CPU Usage\n
     (3 repetitions per point)
     ''', fontdict=title_font, linespacing=0.5)
 
     ## Ticks
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
+    ax1.tick_params(labelsize=14)
+    ax2.tick_params(labelsize=14)
 
     formatter = FuncFormatter(thousands_formatter)
     plt.gca().xaxis.set_major_formatter(formatter)
@@ -90,4 +89,4 @@ for nr_cores in cores:
 
     # Borders work on full screen image
     plt.subplots_adjust(left=0.07, right=0.94, top=0.9, bottom=0.09)
-    fig.show()
+    plt.show()
